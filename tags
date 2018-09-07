@@ -1,0 +1,64 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+COMMON	src/include/log.h	/^	COMMON  = (1 << 0),$/;"	e	enum:__anon10
+CommonReg	src/register/reg.h	/^} CommonReg;$/;"	t	typeref:struct:__anon2
+DEBUG	src/include/log.h	/^	DEBUG   = (1 << 3)$/;"	e	enum:__anon9
+DECODER	src/include/log.h	/^	DECODER = (1 << 1),$/;"	e	enum:__anon10
+DECODER_TASK	src/include/task.h	/^	DECODER_TASK = 0,$/;"	e	enum:__anon8
+DECRYPT	src/include/log.h	/^	DECRYPT = (1 << 3),$/;"	e	enum:__anon10
+DECRYPT_TASK	src/include/task.h	/^	DECRYPT_TASK = 2,$/;"	e	enum:__anon8
+DecoderClass	src/include/decoder.h	/^} DecoderClass;$/;"	t	typeref:struct:__anon7
+DecoderContext	src/include/decoder.h	/^} DecoderContext;$/;"	t	typeref:struct:__anon4
+DecoderReadCtrl	src/include/decoder.h	/^} DecoderReadCtrl;$/;"	t	typeref:struct:__anon5
+DecoderStatus	src/include/decoder.h	/^} DecoderStatus;$/;"	t	typeref:enum:__anon3
+ENCODER	src/include/log.h	/^	ENCODER = (1 << 2),$/;"	e	enum:__anon10
+ENCODER_TASK	src/include/task.h	/^	ENCODER_TASK = 1,$/;"	e	enum:__anon8
+ENCRYPT	src/include/log.h	/^	ENCRYPT = (1 << 4),$/;"	e	enum:__anon10
+ENCRYPT_TASK	src/include/task.h	/^	ENCRYPT_TASK = 3,$/;"	e	enum:__anon8
+ERROR	src/include/log.h	/^	ERROR   = (1 << 2),$/;"	e	enum:__anon9
+FILE	src/platform/dsp32/dsp32_define.h	8;"	d
+FILTER	src/include/log.h	/^	FILTER  = (1 << 5)$/;"	e	enum:__anon10
+FILTER_TASK	src/include/task.h	/^	FILTER_TASK  = 4$/;"	e	enum:__anon8
+INFO	src/include/log.h	/^	INFO    = (1 << 0),$/;"	e	enum:__anon9
+LogLevel	src/include/log.h	/^} LogLevel;$/;"	t	typeref:enum:__anon9
+LogModule	src/include/log.h	/^} LogModule;$/;"	t	typeref:enum:__anon10
+NULL	src/platform/dsp32/dsp32_define.h	9;"	d
+REGISTER_DECODER	src/common/register.c	10;"	d	file:
+SEEK_CUR	src/platform/dsp32/dsp32_define.h	12;"	d
+SEEK_END	src/platform/dsp32/dsp32_define.h	10;"	d
+SEEK_SET	src/platform/dsp32/dsp32_define.h	11;"	d
+TaskID	src/include/task.h	/^} TaskID;$/;"	t	typeref:enum:__anon8
+WARNING	src/include/log.h	/^	WARNING = (1 << 1),$/;"	e	enum:__anon9
+__DECODER_H__	src/include/decoder.h	2;"	d
+__DSP32_DEFINE_H__	src/platform/dsp32/dsp32_define.h	2;"	d
+__LOG_H__	src/include/log.h	2;"	d
+__REGISTER_H__	src/include/register.h	2;"	d
+__REG_H__	src/register/reg.h	2;"	d
+__TASK_H__	src/include/task.h	2;"	d
+codec_id	src/include/decoder.h	/^	CodecID         codec_id;$/;"	m	struct:__anon7
+decClass	src/common/register.c	/^DecoderClass *decClass[MAX_DECODER_NUM] = {NULL};$/;"	v
+decode	src/include/decoder.h	/^	DecoderStatus   (*decode)(DecoderContext *avctx);$/;"	m	struct:__anon7
+do_malloc	src/platform/dsp32/dsp32_define.h	4;"	d
+do_malloc	src/platform/dsp32/dsp32_define.h	5;"	d
+do_realloc	src/platform/dsp32/dsp32_define.h	6;"	d
+find_register_decoder	src/common/register.c	/^DecoderClass *find_register_decoder(CodecID codecId)$/;"	f
+free	src/include/decoder.h	/^	void            (*free)  (DecoderContext *avctx);$/;"	m	struct:__anon7
+init	src/include/decoder.h	/^	DecoderContext* (*init)  (FILE *in, FILE *out, DecoderReadCtrl *rCtrl, DecoderWriteCtrl *wCtrl);$/;"	m	struct:__anon7
+level	src/common/log.c	/^static LogLevel  level  = INFO;$/;"	v	file:
+log_printf	src/common/log.c	/^void log_printf(LogModule m, LogLevel l, const char* fmt, ...)$/;"	f
+log_set_level	src/common/log.c	/^void log_set_level(LogLevel  l)$/;"	f
+log_set_module	src/common/log.c	/^void log_set_module(LogModule m)$/;"	f
+long_name	src/include/decoder.h	/^	const char      *long_name;$/;"	m	struct:__anon7
+module	src/common/log.c	/^static LogModule module = ~0x0;$/;"	v	file:
+name	src/include/decoder.h	/^	const char      *name;$/;"	m	struct:__anon7
+printf_register_all	src/common/register.c	/^void printf_register_all(void)$/;"	f
+register_all	src/common/register.c	/^void register_all(void)$/;"	f
+register_decoder	src/common/register.c	/^void register_decoder(void)$/;"	f
+register_decrypt	src/common/register.c	/^void register_decrypt(void)$/;"	f
+register_encoder	src/common/register.c	/^void register_encoder(void)$/;"	f
+register_encrypt	src/common/register.c	/^void register_encrypt(void)$/;"	f
+register_filter	src/common/register.c	/^void register_filter(void)$/;"	f
