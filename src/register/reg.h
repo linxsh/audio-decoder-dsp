@@ -1,6 +1,12 @@
 #ifndef __REG_H__
 #define __REG_H__
 
+typedef struct {
+} DecoderReadCtrl;
+
+typedef struct {
+} DecoderWriteCtrl;
+
 typedef union {
 	DecoderReadCtrl DECODER_R_REG;
 	EncoderReadCtrl ENCODER_R_REG;

@@ -1,17 +1,13 @@
 #ifndef __DECODER_H__
 #define __DECODER_H__
 
+#include "reg.h"
+
 typedef enum {
 } DecoderStatus;
 
 typedef struct {
 } DecoderContext;
-
-typedef struct {
-} DecoderReadCtrl;
-
-typedef struct {
-} DecoderWriteCtrl
 
 typedef struct {
 	const char      *name;
