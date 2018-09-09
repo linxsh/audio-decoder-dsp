@@ -1,2 +1,2 @@
 # audio-decoder-dsp
-audio decoder and driver for sdp
+audio decoder and driver for dsp
