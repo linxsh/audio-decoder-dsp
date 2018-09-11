@@ -25,5 +25,5 @@ conf : lxdialog/menubox.o lxdialog/yesno.o lxdialog/textbox.o  \
 
 clean :
 	@-find -name "*.o" -exec rm "{}" \;
-	@-rm mconf
+	@-rm mconf -f
 

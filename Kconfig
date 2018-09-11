@@ -1,26 +1,33 @@
-# Audio Dsp Preprocess
 # Author: linxsh
 #
 # Kconfig: Top Level Kconfig
 #
 #---------------------------------------------------------------------------------#
 
-mainmenu "Audio Dsp Configuration"
+mainmenu "Configuration"
 
-# Targets
 choice
-	prompt "Platform Selects:"
+	prompt "Platform Select:"
 	default X86
 
 	config X86
-		bool "X86"
+		bool "x86"
 
 	config DSP32
-		bool "DSP32"
+		bool "dsp32"
 endchoice
 
 #----------------------------------------------------------------------------------#
-menu "Audio Decoder Selects:"
+menu "Version Setting:"
+
+config VERSION
+	string "version"
+	default 1.0.0
+
+endmenu
+
+#----------------------------------------------------------------------------------#
+menu "Decoder Select:"
 
 config VORBIS_DECODER
 	bool "vorbis"
@@ -31,8 +38,9 @@ config OPUS_DECODER
 	default y
 
 endmenu
+
 #----------------------------------------------------------------------------------#
-menu "Audio Encoder Selects:"
+menu "Encoder Select:"
 
 config VORBIS_ENCODER
 	bool "vorbis"
