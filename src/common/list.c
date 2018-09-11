@@ -1,4 +1,5 @@
 #include "config.h"
+#include "defined.h"
 #include "list.h"
 #include "encoder.h"
 #include "decrypt.h"
