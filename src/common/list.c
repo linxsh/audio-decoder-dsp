@@ -1,5 +1,5 @@
 #include "config.h"
-#include "defined.h"
+#include "os_define.h"
 #include "list.h"
 #include "encoder.h"
 #include "decrypt.h"
@@ -34,29 +34,29 @@ void printf_register_all(void)
 	unsigned char i;
 
 	i = 0;
-	log_printf(COMMON, INFO, "=========================\n");
-	log_printf(COMMON, INFO, "decoder:\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "=========================\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "decoder:\n");
 	for (i = 0; i < sizeof(decClass)/sizeof(DecoderClass); i++) {
-		log_printf(COMMON, INFO, "----------------");
-		log_printf(COMMON, INFO, "%s\n", decClass[i]->name);
-		log_printf(COMMON, INFO, "%s\n", decClass[i]->long_name);
+		log_printf(COMMON_MODULE, LEVEL_INFO, "----------------");
+		log_printf(COMMON_MODULE, LEVEL_INFO, "%s\n", decClass[i]->name);
+		log_printf(COMMON_MODULE, LEVEL_INFO, "%s\n", decClass[i]->long_name);
 	}
 
 	i = 0;
-	log_printf(COMMON, INFO, "=========================\n");
-	log_printf(COMMON, INFO, "encoder:\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "=========================\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "encoder:\n");
 
 	i = 0;
-	log_printf(COMMON, INFO, "=========================\n");
-	log_printf(COMMON, INFO, "decrypt:\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "=========================\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "decrypt:\n");
 
 	i = 0;
-	log_printf(COMMON, INFO, "=========================\n");
-	log_printf(COMMON, INFO, "encrypt:\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "=========================\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "encrypt:\n");
 
 	i = 0;
-	log_printf(COMMON, INFO, "=========================\n");
-	log_printf(COMMON, INFO, "filter:\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "=========================\n");
+	log_printf(COMMON_MODULE, LEVEL_INFO, "filter:\n");
 
 	return;
 }

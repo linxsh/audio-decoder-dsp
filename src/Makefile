@@ -1,12 +1,12 @@
--include ../.config
+include ../.config
 
 #------------------------ platform ---------------------#
 ifeq ($(CONFIG_X86), y)
--include ../scripts/x86-compiler.mak
+include ../scripts/x86-compiler.mak
 endif
 
 ifeq ($(CONFIG_DSP32), y)
--include ../scripts/dsp32-compiler.mak
+include ../scripts/dsp32-compiler.mak
 endif
 #-------------------------------------------------------#
 
@@ -31,9 +31,9 @@ obj-$(CONFIG_DSP32) += $(shell find ./platform/dsp32/ -name "*.c")
 obj-$(CONFIG_DSP32) += $(shell find ./register/dsp32/ -name "*.c")
 
 obj-$(CONFIG_VORBIS_DECODER) += $(shell find ./decoder/opus/   -name "*.c")
-obj-$(CONFIG_VORBIS_DECODER) += $(shell find ./libsrc/opus/    -name "*.c")
+#obj-$(CONFIG_VORBIS_DECODER) += $(shell find ./libsrc/opus/    -name "*.c")
 obj-$(CONFIG_OPUS_DECODER)   += $(shell find ./decoder/vorbis/ -name "*.c")
-obj-$(CONFIG_OPUS_DECODER)   += $(shell find ./libsrc/vorbis/  -name "*.c")
+#obj-$(CONFIG_OPUS_DECODER)   += $(shell find ./libsrc/vorbis/  -name "*.c")
 #------------------------------------------------------#
 
 #------------------------------------------------------#
@@ -42,11 +42,12 @@ INCLUDE_DIR += ./register/include
 INCLUDE_DIR += ./platform/include
 INCLUDE_DIR += ./libsrc/opus/include
 
-INCLUDE_FLAGS := $(addprefix -I , $(INCLUDE_DIR))
+INCLUDE_FLAGS := $(addprefix -I,$(INCLUDE_DIR))
 CCFLAGS := $(INCLUDE_FLAGS) -O2 -pipe -Wall -c
 ARFLAGS := -rcs
 
-SOBJECTS := $(subst .c,.o,$(obj-y))
+OBJECTS := $(subst .c,.o,$(obj-y))
+DEPENDS := $(subst .c,.d,$(obj-y))
 #------------------------------------------------------#
 
 .PHONY: prepare
@@ -58,17 +59,26 @@ prepare:
 	@echo "--- Platform: "$(PLATFORM)
 	@echo "--- Decoder: "$(DECODER)
 
-x86.elf: $(SOBJECTS)
+x86.elf: $(OBJECTS)
 	@echo "x86.elf compile complete .."
 
 dsp32.bin:
 	@echo "dsp32.bin compile complete .."
+
+ifneq ($(MAKECMDGOALS), clean)
+-include $(DEPENDS)
+endif
+
+%.d:%.c
+	@$(CC) $(CCFLAGS) -MM $< > $@.$$$$;\
+	sed 's,\(.*\)\.o[ :]*,$(shell dirname $@)/\1.o $@ : ,g' <$@.$$$$ > $@;\
+	rm -f $@.$$$$
 
 %.o:%.c
 	@echo compiling $@
 	@$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:
-	@find ./ -name "*.o"|xargs   $(RM)
-	@find ./ -name "*.d"|xargs   $(RM)
-	@find ./ -name "*.a"|xargs   $(RM)
+	@find ./ -name "*.o"|xargs rm -f
+	@find ./ -name "*.d"|xargs rm -f
+	@find ./ -name "*.a"|xargs rm -f

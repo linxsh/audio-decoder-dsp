@@ -50,13 +50,13 @@ build: .config prepare process result
 	@make menuconfig
 
 prepare: autoconf
-	@mkdir -p ./bin
+	@mkdir -p bin
 
 process:
-	@make -C ./src
+	@make -C src
 
 result:
-	@ls -l ./bin
+	@ls -l bin
 
 clean:
 	@make -C ./src clean

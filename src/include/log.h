@@ -2,19 +2,18 @@
 #define __LOG_H__
 
 typedef enum {
-	INFO    = (1 << 0),
-	WARNING = (1 << 1),
-	ERROR   = (1 << 2),
-	DEBUG   = (1 << 3)
+	LEVEL_INFO = (1 << 0),
+	LEVEL_WARN = (1 << 1),
+	LEVEL_ERRO = (1 << 2),
+	LEVEL_DEBU = (1 << 3)
 } LogLevel;
 
 typedef enum {
-	COMMON  = (1 << 0),
-	DECODER = (1 << 1),
-	ENCODER = (1 << 2),
-	DECRYPT = (1 << 3),
-	ENCRYPT = (1 << 4),
-	FILTER  = (1 << 5)
+	COMMON_MODULE     = (1 << 0),
+	OPUS_DEC_MODULE   = (1 << 1),
+	OPUS_ENC_MODULE   = (1 << 2),
+	VORBIS_DEC_MODULE = (1 << 3),
+	VORBIS_ENC_MODULE = (1 << 4)
 } LogModule;
 
 void log_printf(LogModule m, LogLevel l, const char* fmt, ...);
