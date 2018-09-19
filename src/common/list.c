@@ -1,10 +1,9 @@
-#include "config.h"
-#include "os_define.h"
 #include "list.h"
 #include "encoder.h"
 #include "decrypt.h"
 #include "filter.h"
 #include "log.h"
+#include "os_define.h"
 
 extern DecoderClass opusDec;
 

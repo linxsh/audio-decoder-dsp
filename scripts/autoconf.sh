@@ -15,7 +15,7 @@ fi
 #####################################################################################################
 # Set some important variable by manual
 CONFIG_BUILD_DIR=$(pwd)
-CONFIG_FILE_H=${CONFIG_BUILD_DIR}/src/include/config.h
+CONFIG_FILE_H=${CONFIG_BUILD_DIR}/config.h
 
 #####################################################################################################
 #build config file .h

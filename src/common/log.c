@@ -1,12 +1,12 @@
 #include "log.h"
-#include "os_define.h"
+#include "os_printf.h"
 
 static LogModule module = 0x0;
 static LogLevel  level  = 0x0;
 
 void log_printf(LogModule m, LogLevel l, const char* fmt, ...)
 {
-	uart_va_list args;
+	os_va_list args;
 	const char *mstring = NULL;
 	const char *lstring = NULL;
 
@@ -43,10 +43,10 @@ void log_printf(LogModule m, LogLevel l, const char* fmt, ...)
 		return;
 	}
 
-	uart_printf("[%s][%s]: ",  mstring, lstring);
-	uart_va_start(args, fmt);
-	uart_vprintf(fmt, args);
-	uart_va_end(args);
+	os_printf("[%s][%s]: ",  mstring, lstring);
+	os_va_start(args, fmt);
+	os_vprintf(fmt, args);
+	os_va_end(args);
 
 	return;
 }

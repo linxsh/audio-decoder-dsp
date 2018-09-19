@@ -35,8 +35,7 @@
 #  include "custom_support.h"
 #endif
 
-#include "or32_define.h"
-
+#include "os_define.h"
 #include "opus_types.h"
 #include "opus_defines.h"
 
@@ -47,7 +46,7 @@
 #ifndef OVERRIDE_OPUS_ALLOC
 static OPUS_INLINE void *opus_alloc (size_t size)
 {
-   return my_malloc(size);
+   return os_malloc(size);
 }
 #endif
 
@@ -64,7 +63,7 @@ static OPUS_INLINE void *opus_alloc_scratch (size_t size)
 #ifndef OVERRIDE_OPUS_FREE
 static OPUS_INLINE void opus_free (void *ptr)
 {
-   my_free(ptr);
+   os_free(ptr);
 }
 #endif
 

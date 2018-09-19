@@ -4,9 +4,6 @@ include ../../../scripts/config.mak
 obj-y := $(shell find ./ -name "*.c")
 
 INCLUDE_DIR := ./include
-INCLUDE_DIR += ./celt
-INCLUDE_DIR += ./silk
-INCLUDE_DIR += ./../../platform/include
 
 INCLUDE_FLAGS := $(addprefix -I,$(INCLUDE_DIR))
 CCFLAGS := $(INCLUDE_FLAGS) $(CONFIG_FLAGS) -O2 -pipe -Wall -c
@@ -15,8 +12,8 @@ ARFLAGS := -rcs
 OBJECTS := $(subst .c,.o,$(obj-y))
 DEPENDS := $(subst .c,.d,$(obj-y))
 
-libopus.a: $(OBJECTS)
-	@echo "libopus.a compile complete .."
+libvorbis.a: $(OBJECTS)
+	@echo "libvorbis.a compile complete .."
 
 ifneq ($(MAKECMDGOALS), clean)
 -include $(DEPENDS)

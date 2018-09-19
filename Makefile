@@ -16,7 +16,7 @@
 #
 ###################################################################################
 
-.PHONY: menuconfig autoconf
+.PHONY: menuconfig
 
 all: build
 
@@ -28,7 +28,6 @@ CONFIG_KCONFIG  := Kconfig
 
 menuconfig : $(obj)/mconf $(obj)/conf
 	@$< $(CONFIG_KCONFIG)
-	@scripts/autoconf.sh > /dev/null
 
 $(obj)/mconf:
 	@make -C $(SUBDIR) prepare
@@ -38,29 +37,24 @@ $(obj)/conf:
 	@make -C $(SUBDIR) prepare
 	@make -C $(SUBDIR)
 
-autoconf:
-	@scripts/autoconf.sh > /dev/null
-
 ###################################################################################
-.PHONY: prepare process result
+.PHONY: process result
 
-build: .config prepare process result
+build: .config process result
 
 .config:
 	@make menuconfig
-
-prepare: autoconf
-	@mkdir -p bin
 
 process:
 	@make -C src
 
 result:
+	@mkdir -p bin
 	@ls -l bin
 
 clean:
 	@make -C ./src clean
-	@rm -f ./src/include/config.h
+	@rm -f ./config.h
 	@rm -rf bin
 
 distclean: clean
@@ -68,7 +62,7 @@ distclean: clean
 	@find ./ -name *.o | xargs rm -f
 	@find ./ -name *.d | xargs rm -f
 	@find ./ -name .config | xargs rm -f
-	@find ./src/include/ -name config.h | xargs rm -f
+	@rm -f ./config.h
 
 help:
 	@echo 'Cleaning:'
