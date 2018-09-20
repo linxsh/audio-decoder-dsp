@@ -11,9 +11,10 @@ typedef enum {
 } TaskStatus;
 
 typedef enum {
+	TASK_WORK_ERROR     = -1,
 	TASK_WORK_FINISH    = 0,
 	TASK_WORK_NEED_DATA = 1,
-	TASK_WORK_OVER      = 2
+	TASK_WORK_OVER      = 2,
 } TaskWorkStatus;
 
 typedef enum {

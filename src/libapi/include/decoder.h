@@ -6,9 +6,10 @@
 #include "buf_handle.h"
 
 typedef enum {
-	DECODEC_FINISH    = 0,
-	DECODEC_NEED_DATA = 1,
-	DECODEC_OVER      = 2
+	DECODEC_ERROR     = -1,
+	DECODEC_FINISH    =  0,
+	DECODEC_NEED_DATA =  1,
+	DECODEC_OVER      =  2
 } DecoderStatus;
 
 typedef struct {
