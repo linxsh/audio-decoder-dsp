@@ -5,11 +5,11 @@
 #include "log.h"
 #include "os_define.h"
 
-extern DecoderClass opusDec;
+extern DecoderClass opusDecClass;
 
 DecoderClass *decClass[] = {
 #ifdef CONFIG_OPUS_DECODER
-	&opusDec,
+	&opusDecClass,
 #endif
 };
 

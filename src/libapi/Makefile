@@ -5,6 +5,10 @@ obj-$(CONFIG_VORBIS_DECODER) += $(shell find ./decoder/vorbis/   -name "*.c")
 obj-$(CONFIG_OPUS_DECODER)   += $(shell find ./decoder/opus/     -name "*.c")
 
 INCLUDE_DIR := ./include
+INCLUDE_DIR += ../include
+INCLUDE_DIR += ../register/include
+INCLUDE_DIR += ../platform/include
+
 INCLUDE_FLAGS := $(addprefix -I,$(INCLUDE_DIR))
 CCFLAGS := $(INCLUDE_FLAGS) $(CONFIG_FLAGS) -O2 -pipe -Wall -c
 ARFLAGS := -rcs
