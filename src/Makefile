@@ -2,7 +2,8 @@ include ../.config
 include ../scripts/config.mak
 
 #-------------------------------------------------------#
-obj-y := $(shell find ./common/ -name "*.c")
+obj-y := $(shell find ./common/          -name "*.c")
+obj-y += $(shell find ./platform/common/ -name "*.c")
 
 obj-$(CONFIG_X86)   += $(shell find ./demo/x86/       -name "*.c")
 obj-$(CONFIG_X86)   += $(shell find ./platform/x86/   -name "*.c")

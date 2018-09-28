@@ -30,6 +30,7 @@ void log_printf(LogModule m, LogLevel l, const char* fmt, ...)
 	switch (m & module) {
 	case COMMON_MODULE:
 		mstring = "comn mdl";
+		break;
 	case OPUS_DEC_MODULE:
 		mstring = "opus dec";
 		break;

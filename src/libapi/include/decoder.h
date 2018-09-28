@@ -3,7 +3,7 @@
 
 #include "format.h"
 #include "register.h"
-#include "buf_handle.h"
+#include "os_buffer.h"
 
 typedef enum {
 	DECODEC_ERROR     = -1,
@@ -19,7 +19,7 @@ typedef struct {
 	const char      *name;
 	const char      *long_name;
 	CodecID         codec_id;
-	DecoderContext* (*init)  (BufHandle *in,  BufHandle *out, DecoderReadCtrl *rCtrl, DecoderWriteCtrl *wCtrl);
+	DecoderContext* (*init)  (OsBufferHandle *in, OsBufferHandle *out, DecoderReadCtrl *rCtrl, DecoderWriteCtrl *wCtrl);
 	void            (*free)  (DecoderContext *avctx);
 	DecoderStatus   (*decode)(DecoderContext *avctx);
 } DecoderClass;

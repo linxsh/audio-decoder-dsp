@@ -1,12 +1,13 @@
 #include "decoder.h"
 #include "os_define.h"
+#include "os_malloc.h"
 #include "log.h"
 #include "../../libsrc/opus/include/opus_types.h"
 #include "../../libsrc/opus/include/opus_multistream.h"
 
-static DecoderContext* opus_dec_init(BufHandle *in,
-		BufHandle *out,
-		DecoderReadCtrl *rCtrl,
+static DecoderContext* opus_dec_init(OsBufferHandle *in,
+		OsBufferHandle   *out,
+		DecoderReadCtrl  *rCtrl,
 		DecoderWriteCtrl *wCtrl)
 {
 	DecoderContext *opusDec = os_malloc(sizeof(DecoderContext));

@@ -36,6 +36,7 @@
 #endif
 
 #include "os_define.h"
+#include "os_malloc.h"
 #include "opus_types.h"
 #include "opus_defines.h"
 
