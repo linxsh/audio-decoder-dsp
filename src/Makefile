@@ -2,15 +2,13 @@ include ../.config
 include ../scripts/config.mak
 
 #-------------------------------------------------------#
-obj-y := $(shell find ./common/          -name "*.c")
+obj-y := $(shell find ./demo/            -name "*.c")
+obj-y += $(shell find ./common/          -name "*.c")
+obj-y += $(shell find ./register/common/ -name "*.c")
 obj-y += $(shell find ./platform/common/ -name "*.c")
 
-obj-$(CONFIG_X86)   += $(shell find ./demo/x86/       -name "*.c")
 obj-$(CONFIG_X86)   += $(shell find ./platform/x86/   -name "*.c")
-obj-$(CONFIG_X86)   += $(shell find ./register/x86/   -name "*.c")
-obj-$(CONFIG_DSP32) += $(shell find ./demo/dsp32/     -name "*.c")
 obj-$(CONFIG_DSP32) += $(shell find ./platform/dsp32/ -name "*.c")
-obj-$(CONFIG_DSP32) += $(shell find ./register/dsp32/ -name "*.c")
 #------------------------------------------------------#
 
 #------------------------------------------------------#
