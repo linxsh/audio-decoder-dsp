@@ -55,9 +55,18 @@ int os_timer_read_ms(unsigned int num)
 	unsigned int cnt = 0;
 	cnt = dsp32_timer_read(num);
 
-	return (sFreq == 0) ? (cnt / sFreq) : 0;
+	return (sFreq == 0) ? 0 : (cnt / (sFreq / 1000));
 #endif
 #ifdef CONFIG_X86
 	return x86_timer_read_ms(num);
 #endif
+}
+
+void os_timer_wait_ms(unsigned int num, unsigned int timeMs)
+{
+	os_timer_stop (num);
+	os_timer_clear(num);
+	os_timer_start(num);
+	while (os_timer_read_ms(num) < timeMs);
+	os_timer_stop (num);
 }

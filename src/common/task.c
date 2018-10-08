@@ -8,29 +8,36 @@
 #include "decoder.h"
 
 static TaskContext sTaskContext[] = {
-	{0, TASK_IDLE, TASK_WORK_NONE, NULL, NULL, NULL},
-	{1, TASK_IDLE, TASK_WORK_NONE, NULL, NULL, NULL},
-	{2, TASK_IDLE, TASK_WORK_NONE, NULL, NULL, NULL},
-	{3, TASK_IDLE, TASK_WORK_NONE, NULL, NULL, NULL}
+	{0, TASK_IDLE, TASK_DO_STOP, {}, NULL, NULL, NULL},
+	{1, TASK_IDLE, TASK_DO_STOP, {}, NULL, NULL, NULL},
+	{2, TASK_IDLE, TASK_DO_STOP, {}, NULL, NULL, NULL},
+	{3, TASK_IDLE, TASK_DO_STOP, {}, NULL, NULL, NULL}
 };
 
-int task_create(int taskID, TaskWorkType type, TaskWorkParam *param)
+int task_create(int taskID, TaskDo taskDo)
 {
+	ExtraReadReg  *rCtrl = reg_get_extra_read_addr ();
+	ExtraWriteReg *wCtrl = reg_get_extra_write_addr();
+	ExtraDebugReg *dCtrl = reg_get_extra_debug_addr();
+	OsBufferHandle *inBuf  = os_buffer_open(OS_BUFFER_INPUT );
+	OsBufferHandle *outBuf = os_buffer_open(OS_BUFFER_OUTPUT);
+	CodecID codecID = reg_get_codec_id();
+
 	if (TASK_IDLE != sTaskContext[taskID].task_status) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO, "taskID(%d) have create\n", taskID);
 		return TASK_FAILURE;
 	}
 
-	if (TASK_WORK_DECODER == type) {
+	if (TASK_DO_DECODER == taskDo) {
 		DecoderClass   *cls = NULL;
 		DecoderContext *ctx = NULL;
 
-		if (NULL == cls) {
-			log_printf(COMMON_MODULE, LEVEL_ERRO, "(%d) decoder find fail\n", param->codec_id);
+		if (NULL == (cls = find_register_decoder(codecID))) {
+			log_printf(COMMON_MODULE, LEVEL_ERRO, "(%d) decoder find fail\n", codecID);
 			return TASK_FAILURE;
 		}
 
-		ctx = cls->init ? cls->init(param->in, param->out, param->rCtrl, param->wCtrl) : NULL;
+		ctx = cls->init ? cls->init(inBuf, outBuf, &rCtrl->DECODER_R_REG, &wCtrl->DECODER_W_REG) : NULL;
 		if (NULL == ctx) {
 			log_printf(COMMON_MODULE, LEVEL_ERRO, "(%s) decoder init fail\n", cls->name);
 			return TASK_FAILURE;
@@ -40,19 +47,25 @@ int task_create(int taskID, TaskWorkType type, TaskWorkParam *param)
 		sTaskContext[taskID].priv_class   = cls;
 		sTaskContext[taskID].priv_context = ctx;
 	} else {
-		log_printf(COMMON_MODULE, LEVEL_ERRO, "taskType(%d) error\n", type);
+		log_printf(COMMON_MODULE, LEVEL_ERRO, "taskDo(%d) error\n", taskDo);
 		return TASK_FAILURE;
 	}
 
-	sTaskContext[taskID].work_type    = type;
-	sTaskContext[taskID].task_status  = TASK_WORK;
+	sTaskContext[taskID].task_do_param.r_ctrl   = rCtrl;
+	sTaskContext[taskID].task_do_param.w_ctrl   = wCtrl;
+	sTaskContext[taskID].task_do_param.d_ctrl   = dCtrl;
+	sTaskContext[taskID].task_do_param.in_buf   = inBuf;
+	sTaskContext[taskID].task_do_param.out_buf  = outBuf;
+	sTaskContext[taskID].task_do_param.codec_id = codecID;
+	sTaskContext[taskID].task_do     = taskDo;
+	sTaskContext[taskID].task_status = TASK_WORK;
 
 	return TASK_SUCCESS;
 }
 
 void task_destory(int taskID)
 {
-	TaskWorkType   type = sTaskContext[taskID].work_type;
+	TaskDo         type = sTaskContext[taskID].task_do;
 	DecoderClass   *cls = sTaskContext[taskID].priv_class;
 	DecoderContext *ctx = sTaskContext[taskID].priv_context;
 
@@ -61,10 +74,9 @@ void task_destory(int taskID)
 		return;
 	}
 
-	if (TASK_WORK_DECODER == type) {
+	if (TASK_DO_DECODER == type) {
 		if (cls->free)
 			cls->free(ctx);
-
 		sTaskContext[taskID].priv_name    = NULL;
 		sTaskContext[taskID].priv_class   = NULL;
 		sTaskContext[taskID].priv_context = NULL;
@@ -73,23 +85,35 @@ void task_destory(int taskID)
 		return;
 	}
 
-	sTaskContext[taskID].work_type    = TASK_WORK_NONE;
+	if (sTaskContext[taskID].task_do_param.in_buf) {
+		os_buffer_close(sTaskContext[taskID].task_do_param.in_buf);
+		sTaskContext[taskID].task_do_param.in_buf = NULL;
+	}
+	if (sTaskContext[taskID].task_do_param.out_buf) {
+		os_buffer_close(sTaskContext[taskID].task_do_param.out_buf);
+		sTaskContext[taskID].task_do_param.out_buf = NULL;
+	}
+	sTaskContext[taskID].task_do_param.r_ctrl  = NULL;
+	sTaskContext[taskID].task_do_param.w_ctrl  = NULL;
+	sTaskContext[taskID].task_do_param.d_ctrl  = NULL;
+	sTaskContext[taskID].task_do      = TASK_DO_STOP;
 	sTaskContext[taskID].task_status  = TASK_IDLE;
 
 	return;
 }
 
-TaskWorkStatus task_process(int taskID)
+TaskDoResult task_process(int taskID)
 {
-	TaskWorkStatus status = TASK_WORK_ERROR;
-	TaskWorkType   type = sTaskContext[taskID].work_type;
+	TaskDoResult taskDoResult = TASK_DO_ERROR;
 
 	if (TASK_IDLE == sTaskContext[taskID].task_status) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO, "taskID(%d) have destory\n", taskID);
-		return TASK_WORK_ERROR;
+		return TASK_DO_ERROR;
 	}
 
-	if (TASK_WORK_DECODER == type) {
+	os_buffer_update_from(sTaskContext[taskID].task_do_param.in_buf,  OS_BUFFER_W_ATTR);
+	os_buffer_update_from(sTaskContext[taskID].task_do_param.out_buf, OS_BUFFER_R_ATTR);
+	if (TASK_DO_DECODER == sTaskContext[taskID].task_do) {
 		DecoderClass   *cls = sTaskContext[taskID].priv_class;
 		DecoderContext *ctx = sTaskContext[taskID].priv_context;
 		DecoderStatus  decStatus = DECODEC_ERROR;
@@ -98,16 +122,18 @@ TaskWorkStatus task_process(int taskID)
 			decStatus = cls->decode(ctx);
 
 		if (DECODEC_FINISH == decStatus)
-			status = TASK_WORK_FINISH;
+			taskDoResult = TASK_DO_FINISH;
 		else if (DECODEC_NEED_DATA == decStatus)
-			status = TASK_WORK_NEED_DATA;
+			taskDoResult = TASK_DO_NEED_DATA;
 		else if (DECODEC_OVER == decStatus)
-			status = TASK_WORK_OVER;
+			taskDoResult = TASK_DO_OVER;
 		else
-			status = TASK_WORK_ERROR;
+			taskDoResult = TASK_DO_ERROR;
 	}
+	os_buffer_update_to(sTaskContext[taskID].task_do_param.in_buf,  OS_BUFFER_R_ATTR);
+	os_buffer_update_to(sTaskContext[taskID].task_do_param.out_buf, OS_BUFFER_W_ATTR);
 
-	return status;
+	return taskDoResult;
 }
 
 TaskStatus task_status(int taskID)
@@ -126,14 +152,14 @@ void task_printf(void)
 {
 	int taskNum = sizeof(sTaskContext) / sizeof(TaskContext);
 	int i = 0;
-	const char *taskStatString[] = {"idle", "work"};
-	const char *workTypeString[] = {"none", "decoder", "encoder", "decrypt", "encrypt", "filter"};
+	const char *taskStString[] = {"idle", "work"};
+	const char *taskDoString[] = {"none", "decoder", "encoder", "decrypt", "encrypt", "filter"};
 
 	log_printf(COMMON_MODULE, LEVEL_INFO, "=============================\n");
 	for (i = 0; i < taskNum; i++) {
 		log_printf(COMMON_MODULE, LEVEL_INFO, "Task ID:     %d\n", sTaskContext[i].task_id);
-		log_printf(COMMON_MODULE, LEVEL_INFO, "Task Status: %s\n", taskStatString[sTaskContext[i].task_status]);
-		log_printf(COMMON_MODULE, LEVEL_INFO, "Work Type:   %s\n", workTypeString[sTaskContext[i].work_type]);
+		log_printf(COMMON_MODULE, LEVEL_INFO, "Task Status: %s\n", taskStString[sTaskContext[i].task_status]);
+		log_printf(COMMON_MODULE, LEVEL_INFO, "Work Type:   %s\n", taskDoString[sTaskContext[i].task_do]);
 		log_printf(COMMON_MODULE, LEVEL_INFO, "Codec Name:  %s\n", sTaskContext[i].priv_name);
 		log_printf(COMMON_MODULE, LEVEL_INFO, "------------------------\n");
 	}

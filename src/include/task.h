@@ -11,41 +11,43 @@ typedef enum {
 } TaskStatus;
 
 typedef enum {
-	TASK_WORK_ERROR     = -1,
-	TASK_WORK_FINISH    = 0,
-	TASK_WORK_NEED_DATA = 1,
-	TASK_WORK_OVER      = 2,
-} TaskWorkStatus;
+	TASK_DO_STOP    = 0,
+	TASK_DO_DECODER = 1,
+	TASK_DO_ENCODER = 2,
+	TASK_DO_DECRYPT = 3,
+	TASK_DO_ENCRYPT = 4,
+	TASK_DO_FILTER  = 5
+} TaskDo;
 
 typedef enum {
-	TASK_WORK_NONE    = 0,
-	TASK_WORK_DECODER = 1,
-	TASK_WORK_ENCODER = 2,
-	TASK_WORK_DECRYPT = 3,
-	TASK_WORK_ENCRYPT = 4,
-	TASK_WORK_FILTER  = 5
-} TaskWorkType;
+	TASK_DO_ERROR     = -1,
+	TASK_DO_FINISH    = 0,
+	TASK_DO_NEED_DATA = 1,
+	TASK_DO_OVER      = 2,
+} TaskDoResult;
 
 typedef struct {
 	CodecID          codec_id;
-	OsBufferHandle   *in;
-	OsBufferHandle   *out;
-	DecoderReadCtrl  *rCtrl;
-	DecoderWriteCtrl *wCtrl;
-} TaskWorkParam;
+	OsBufferHandle   *in_buf;
+	OsBufferHandle   *out_buf;
+	ExtraReadReg     *r_ctrl;
+	ExtraWriteReg    *w_ctrl;
+	ExtraDebugReg    *d_ctrl;
+} TaskDoParam;
 
 typedef struct {
 	int          task_id;
 	TaskStatus   task_status;
-	TaskWorkType work_type;
+	TaskDo       task_do;
+	TaskDoParam  task_do_param;
 	const char   *priv_name;
 	void         *priv_class;
 	void         *priv_context;
 } TaskContext;
 
-extern int            task_create (int taskID, TaskWorkType type, TaskWorkParam *param);
+extern int            task_create (int taskID, TaskDo taskDo);
 extern void           task_destory(int taskID);
-extern TaskWorkStatus task_process(int taskID);
+extern TaskDoResult   task_process(int taskID);
 extern TaskStatus     task_status (int taskID);
 extern void           task_printf (void);
 #endif

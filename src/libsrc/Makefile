@@ -3,10 +3,13 @@ include ../../scripts/config.mak
 
 all: build
 
-libvorbis.a:
+libogg.a:
+	@make -C ogg
+
+libvorbis.a:libogg.a
 	@make -C vorbis
 
-libopus.a:
+libopus.a:libogg.a
 	@make -C opus
 
 build: $(CONFIG_LIBS)

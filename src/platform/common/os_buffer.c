@@ -40,10 +40,10 @@ static void check_buffer(OsBufferHandle *handle)
 				__FUNCTION__, __LINE__, handle->size, reg_get_buffer_size(regBufType));
 	}
 
-	if (handle->count != reg_get_buffer_count(regBufType)) {
+	if (handle->channel != reg_get_buffer_count(regBufType)) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO,
-				"%s %d: count(%d, %d)\n",
-				__FUNCTION__, __LINE__, handle->count, reg_get_buffer_count(regBufType));
+				"%s %d: channel(%d, %d)\n",
+				__FUNCTION__, __LINE__, handle->channel, reg_get_buffer_count(regBufType));
 	}
 
 	return;
@@ -60,12 +60,19 @@ OsBufferHandle *os_buffer_open(OsBufferType type)
 	}
 
 	os_memset(handle, 0, sizeof(OsBufferHandle));
-	handle->type   = type;
-	handle->addr   = reg_get_buffer_addr (regBufType);
-	handle->size   = reg_get_buffer_size (regBufType);
-	handle->count  = reg_get_buffer_count(regBufType);
+	handle->type    = type;
+	handle->addr    = reg_get_buffer_addr (regBufType);
+	handle->size    = reg_get_buffer_size (regBufType);
+	handle->channel = reg_get_buffer_count(regBufType);
 
 	return handle;
+}
+
+void os_buffer_close(OsBufferHandle *handle)
+{
+	os_free(handle);
+
+	return;
 }
 
 int os_buffer_update_from(OsBufferHandle *handle, OsBufferAttr rw)
@@ -118,10 +125,10 @@ int os_buffer_read(OsBufferHandle *handle,
 {
 	unsigned int sAddr = 0, eAddr = 0, rAddr = 0;
 
-	if (index >= handle->count) {
+	if (index >= handle->channel) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO,
-				"%s %d: index(%d) count(%d)\n",
-				__FUNCTION__, __LINE__, index, handle->count);
+				"%s %d: index(%d) channel(%d)\n",
+				__FUNCTION__, __LINE__, index, handle->channel);
 		return -1;
 	}
 
@@ -151,10 +158,10 @@ int os_buffer_write(OsBufferHandle *handle,
 {
 	unsigned int sAddr = 0, eAddr = 0, wAddr = 0;
 
-	if (index >= handle->count) {
+	if (index >= handle->channel) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO,
-				"%s %d: index(%d) count(%d)\n",
-				__FUNCTION__, __LINE__, index, handle->count);
+				"%s %d: index(%d) channel(%d)\n",
+				__FUNCTION__, __LINE__, index, handle->channel);
 		return -1;
 	}
 

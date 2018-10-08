@@ -12,8 +12,7 @@ typedef enum {
 	DECODEC_OVER      =  2
 } DecoderStatus;
 
-typedef struct {
-} DecoderContext;
+typedef void DecoderContext;
 
 typedef struct {
 	const char      *name;

@@ -53,9 +53,29 @@ void register_destory(void)
 /***************************************************************/
 /*************** General Register Get Option *******************/
 /***************************************************************/
-unsigned int reg_get_codec_type(void)
+unsigned int reg_get_task_id(void)
 {
-	return REG_GET_VAL(&(sReg->CODEC_TYPE));
+	return REG_GET_FIELD(&(sReg->RUN_CTRL), 4, 0);
+}
+
+unsigned int reg_get_task_do(void)
+{
+	return REG_GET_FIELD(&(sReg->RUN_CTRL), 4, 4);
+}
+
+unsigned int reg_get_codec_id(void)
+{
+	return REG_GET_FIELD(&(sReg->RUN_CTRL), 8, 8);
+}
+
+unsigned int reg_get_request_reset(void)
+{
+	return REG_GET_FIELD(&(sReg->RUN_CTRL), 1, 24);
+}
+
+unsigned int reg_get_task_enable(void)
+{
+	return REG_GET_FIELD(&(sReg->RUN_CTRL), 1, 31);
 }
 
 unsigned int reg_get_run_frequency(void)
@@ -166,7 +186,17 @@ void reg_set_interrupt_type(RegIntType type)
 	}
 }
 
-void reg_set_task_work(unsigned int enable)
+void reg_set_codec_type(unsigned int codecType)
+{
+	REG_SET_VAL(&(sReg->CODEC_TYPE), codecType);
+}
+
+void reg_set_error_code(unsigned int errorCode)
+{
+	REG_SET_VAL(&(sReg->ERROR_CODE), errorCode);
+}
+
+void reg_set_task_enable(unsigned int enable)
 {
 	REG_SET_FIELD(&(sReg->RUN_CTRL), enable, 1, 31);
 }
@@ -220,4 +250,14 @@ ExtraDebugReg *reg_get_extra_debug_addr(void)
 	unsigned int highBaseAddr = REG_GET_VAL(&(sReg->EXT0));
 	return (ExtraDebugReg *)(((unsigned long long)highBaseAddr << 32) | debugAddr);
 #endif
+}
+
+void extra_reg_set(unsigned int *reg, unsigned int value)
+{
+	REG_SET_VAL(reg, value);
+}
+
+unsigned int extra_reg_get(unsigned int *reg)
+{
+	return REG_GET_VAL(reg);
 }

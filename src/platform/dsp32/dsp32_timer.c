@@ -31,7 +31,7 @@ void dsp32_timer_clear(int num)
 	CNT_CLR_REG = 0;
 }
 
-int dsp32_timer_read_ms(int num)
+int dsp32_timer_read(int num)
 {
 	volatile unsigned long* temp;
 	unsigned long time;

@@ -6,5 +6,6 @@ extern void os_timer_start  (unsigned int num);
 extern void os_timer_stop   (unsigned int num);
 extern void os_timer_clear  (unsigned int num);
 extern int  os_timer_read_ms(unsigned int num);
+extern void os_timer_wait_ms(unsigned int num, unsigned int timeMs);
 
 #endif
