@@ -1,10 +1,13 @@
+CONFIG_FLAGS := -DCOMPILE_VERS=\"$(CONFIG_VERSION)\"
+CONFIG_FLAGS += -DCOMPILE_DATE=\"$(shell date +%F)\$(shell date +%H:%M:%S)\"
+
 #------------------------ platform ---------------------#
 ifeq ($(CONFIG_X86), y)
 CROSS_COMPILER= 
 CROSS_COMPILER_PATH=
 PLATFORM = x86
 TARGETS  = x86.elf
-CONFIG_FLAGS := -DCONFIG_X86
+CONFIG_FLAGS += -DCONFIG_X86
 endif
 
 ifeq ($(CONFIG_DSP32), y)
@@ -12,7 +15,7 @@ CROSS_COMPILER=
 CROSS_COMPILER_PATH=
 PLATFORM = dsp32
 TARGETS  = dsp32.bin
-CONFIG_FLAGS := -DCONFIG_DSP32
+CONFIG_FLAGS += -DCONFIG_DSP32
 endif
 
 CC      = $(CROSS_COMPILER_PATCH)$(CROSS_COMPILER)gcc
@@ -30,14 +33,14 @@ READELF = $(CROSS_COMPILER_PATCH)$(CROSS_COMPILER)readelf -a
 #------------------------ decoder ----------------------#
 ifeq ($(CONFIG_VORBIS_DECODER), y)
 DECODER += vorbis
-CONFIG_FLAGS += -DCONFIG_VORBIS_DECODER
 CONFIG_LIBS  += libvorbis.a
+CONFIG_FLAGS += -DCONFIG_VORBIS_DECODER
 endif
 
 ifeq ($(CONFIG_OPUS_DECODER), y)
 DECODER += opus
-CONFIG_FLAGS += -DCONFIG_OPUS_DECODER
 CONFIG_LIBS  += libopus.a
+CONFIG_FLAGS += -DCONFIG_OPUS_DECODER
 endif
 #-------------------------------------------------------#
 

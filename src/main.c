@@ -3,7 +3,7 @@
 #include "os_buffer.h"
 #include "os_malloc.h"
 #include "register.h"
-#include "log.h"
+#include "log_printf.h"
 #include "format.h"
 #include "task.h"
 
@@ -14,11 +14,11 @@ int startup(void)
 	os_printf_init(runFreq);
 	os_timer_init (runFreq);
 
-	log_printf(COMMON_MODULE, LEVEL_INFO, "version:\n");
-	log_printf(COMMON_MODULE, LEVEL_INFO, "date: %s %s\n", __DATE__, __TIME__);
+	log_printf(COMMON_MODULE, LEVEL_INFO, "version: %s\n", COMPILE_VERS);
+	log_printf(COMMON_MODULE, LEVEL_INFO, "date:    %s\n", COMPILE_DATE);
 	log_printf(COMMON_MODULE, LEVEL_INFO, "run addr: 0x%p\n", reg_get_run_space_addr());
-	log_printf(COMMON_MODULE, LEVEL_INFO, "run size: %d\n", reg_get_run_space_size());
-	log_printf(COMMON_MODULE, LEVEL_INFO, "run freq: 0x%x\n", runFreq);
+	log_printf(COMMON_MODULE, LEVEL_INFO, "run size: %d\n",   reg_get_run_space_size());
+	log_printf(COMMON_MODULE, LEVEL_INFO, "run freq: %d(HZ)\n", runFreq);
 
 	reg_set_task_enable(1);
 	reg_set_task_queue(REG_TASK_QUEUE0|REG_TASK_QUEUE1, 0xf);

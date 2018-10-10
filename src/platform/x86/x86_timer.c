@@ -1,7 +1,7 @@
 #include <time.h>
 #include "os_define.h"
 #include "x86_timer.h"
-#include "log.h"
+#include "log_printf.h"
 
 #define MAX_X86_TIMER 6
 

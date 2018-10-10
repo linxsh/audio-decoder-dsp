@@ -1,4 +1,4 @@
-#include "chip.h"
+#include "dsp32_chip.h"
 #include "dsp32_timer.h"
 
 #define CNT_EN_REG  (*(volatile unsigned long*)(CONFIG_TIMER_BASE_ADDR))

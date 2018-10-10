@@ -2,7 +2,7 @@
 #include "os_buffer.h"
 #include "os_malloc.h"
 #include "register.h"
-#include "log.h"
+#include "log_printf.h"
 
 #ifdef CONFIG_X86
 #include "../x86/x86_buffer.h"

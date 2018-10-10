@@ -1,6 +1,6 @@
 #include "os_define.h"
 #include "register.h"
-#include "log.h"
+#include "log_printf.h"
 
 static GeneralReg *sReg = NULL;
 

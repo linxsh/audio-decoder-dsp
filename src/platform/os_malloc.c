@@ -1,6 +1,6 @@
 #include "os_define.h"
 #include "os_malloc.h"
-#include "log.h"
+#include "log_printf.h"
 
 #define BLOCK_SIZE  (512*1024)
 #define BLOCK_SHIFT (18) //256k

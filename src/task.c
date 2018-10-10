@@ -3,7 +3,7 @@
 #include "format.h"
 #include "register.h"
 #include "task.h"
-#include "log.h"
+#include "log_printf.h"
 #include "list.h"
 #include "decoder.h"
 

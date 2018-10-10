@@ -1,5 +1,5 @@
-#include "log.h"
 #include "os_printf.h"
+#include "log_printf.h"
 
 static LogModule module = 0x0;
 static LogLevel  level  = 0x0;

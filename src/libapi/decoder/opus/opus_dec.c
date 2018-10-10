@@ -12,7 +12,7 @@
 #include "os_define.h"
 #include "os_malloc.h"
 #include "os_buffer.h"
-#include "log.h"
+#include "log_printf.h"
 #include "register.h"
 #include "../../libsrc/ogg/include/ogg.h"
 #include "../../libsrc/opus/include/opus_types.h"
