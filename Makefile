@@ -49,12 +49,10 @@ process:
 	@make -C src
 
 result:
-	@mkdir -p bin
 	@ls -l bin
 
 clean:
 	@make -C ./src clean
-	@rm -f ./config.h
 	@rm -rf bin
 
 distclean: clean
@@ -62,7 +60,6 @@ distclean: clean
 	@find ./ -name *.o | xargs rm -f
 	@find ./ -name *.d | xargs rm -f
 	@find ./ -name .config | xargs rm -f
-	@rm -f ./config.h
 
 help:
 	@echo 'Cleaning:'
