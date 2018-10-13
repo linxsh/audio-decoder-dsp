@@ -13,7 +13,9 @@ typedef enum {
 	OPUS_DEC_MODULE   = (1 << 1),
 	OPUS_ENC_MODULE   = (1 << 2),
 	VORBIS_DEC_MODULE = (1 << 3),
-	VORBIS_ENC_MODULE = (1 << 4)
+	VORBIS_ENC_MODULE = (1 << 4),
+
+	DRIVER_MODULE     = (1 << 31)
 } LogModule;
 
 void log_printf(LogModule m, LogLevel l, const char* fmt, ...);

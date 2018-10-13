@@ -23,7 +23,7 @@ for details.
 #include "os_define.h"
 #include "os_buffer.h"
 #include "os_malloc.h"
-#include "include/ogg.h"
+#include "ogg.h"
 
 int lacing_val[2048];
 /* A complete description of Ogg framing exists in docs/framing.html */

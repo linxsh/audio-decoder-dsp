@@ -1,7 +1,7 @@
 #include "os_define.h"
+#include "register.h"
 #include "os_buffer.h"
 #include "os_malloc.h"
-#include "register.h"
 #include "log_printf.h"
 
 #ifdef CONFIG_X86
@@ -12,47 +12,35 @@
 #include "../dsp32/dsp32_buffer.h"
 #endif
 
-static RegBufType switch_buffer_type(OsBufferType type)
-{
-	RegBufType regBufType = REG_BUF_INPUT;
-
-	if (OS_BUFFER_INPUT == type)
-		regBufType = REG_BUF_INPUT;
-	else if (OS_BUFFER_OUTPUT == type)
-		regBufType = REG_BUF_OUTPUT;
-
-	return regBufType;
-}
-
 static void check_buffer(OsBufferHandle *handle)
 {
-	RegBufType regBufType = switch_buffer_type(handle->type);
-
-	if (handle->addr != reg_get_buffer_addr(regBufType)) {
+	if (handle->addr != ext_reg_get_buf_addr(handle->reg, handle->io)) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO,
 				"%s %d: addr(%p, %p)\n",
-				__FUNCTION__, __LINE__, handle->addr, reg_get_buffer_addr(regBufType));
+				__FUNCTION__, __LINE__,
+				handle->addr, ext_reg_get_buf_addr(handle->reg, handle->io));
 	}
 
-	if (handle->size != reg_get_buffer_size(regBufType)) {
+	if (handle->size != ext_reg_get_buf_size(handle->reg, handle->io)) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO,
 				"%s %d: size(%x, %x)\n",
-				__FUNCTION__, __LINE__, handle->size, reg_get_buffer_size(regBufType));
+				__FUNCTION__, __LINE__,
+				handle->size, ext_reg_get_buf_size(handle->reg, handle->io));
 	}
 
-	if (handle->channel != reg_get_buffer_count(regBufType)) {
+	if (handle->channel != ext_reg_get_buf_channel(handle->reg, handle->io)) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO,
 				"%s %d: channel(%d, %d)\n",
-				__FUNCTION__, __LINE__, handle->channel, reg_get_buffer_count(regBufType));
+				__FUNCTION__, __LINE__,
+				handle->channel, ext_reg_get_buf_channel(handle->reg, handle->io));
 	}
 
 	return;
 }
 
-OsBufferHandle *os_buffer_open(OsBufferType type)
+OsBufferHandle *os_buffer_open(BufferIO io, ExtBufferReg *reg)
 {
 	OsBufferHandle *handle = os_malloc(sizeof(OsBufferHandle));
-	RegBufType regBufType = switch_buffer_type(type);
 
 	if (NULL == handle) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO, "%s %d: malloc error\n", __FUNCTION__, __LINE__);
@@ -60,10 +48,11 @@ OsBufferHandle *os_buffer_open(OsBufferType type)
 	}
 
 	os_memset(handle, 0, sizeof(OsBufferHandle));
-	handle->type    = type;
-	handle->addr    = reg_get_buffer_addr (regBufType);
-	handle->size    = reg_get_buffer_size (regBufType);
-	handle->channel = reg_get_buffer_count(regBufType);
+	handle->io      = io;
+	handle->reg     = reg;
+	handle->addr    = ext_reg_get_buf_addr   (reg, io);
+	handle->size    = ext_reg_get_buf_size   (reg, io);
+	handle->channel = ext_reg_get_buf_channel(reg, io);
 
 	return handle;
 }
@@ -77,28 +66,26 @@ void os_buffer_close(OsBufferHandle *handle)
 
 int os_buffer_update_from(OsBufferHandle *handle, OsBufferAttr rw)
 {
-	RegBufType regBufType = switch_buffer_type(handle->type);
+	check_buffer(handle);
 
 	if (rw & OS_BUFFER_R_ATTR)
-		handle->r_addr = reg_get_buffer_r_addr(regBufType);
+		handle->r_addr = ext_reg_get_buf_r_addr(handle->reg, handle->io);
 
 	if (rw & OS_BUFFER_W_ATTR)
-		handle->w_addr = reg_get_buffer_w_addr(regBufType);
+		handle->w_addr = ext_reg_get_buf_w_addr(handle->reg, handle->io);
 
 	return 0;
 }
 
 int os_buffer_update_to(OsBufferHandle *handle, OsBufferAttr rw)
 {
-	unsigned rAddr = (handle->r_addr == 0) ? (handle->size - 1) : (handle->r_addr - 1);
-	unsigned wAddr = (handle->w_addr == 0) ? (handle->size - 1) : (handle->w_addr - 1);
-	RegBufType regBufType = switch_buffer_type(handle->type);
+	check_buffer(handle);
 
 	if (rw & OS_BUFFER_R_ATTR)
-		reg_set_buffer_r_addr(regBufType, rAddr);
+		ext_reg_set_buf_r_addr(handle->reg, handle->io, handle->r_addr);
 
 	if (rw & OS_BUFFER_W_ATTR)
-		reg_set_buffer_w_addr(regBufType, wAddr);
+		ext_reg_set_buf_w_addr(handle->reg, handle->io, handle->w_addr);
 
 	return 0;
 }

@@ -2,17 +2,22 @@
 #define __REG_H__
 
 typedef struct {
+	unsigned int CODEC_ID;
 } DecoderReadCtrl;
 
 typedef struct {
-	unsigned int sample_rate;
-	unsigned int channels;
+	unsigned int ERROR_CODE;
+	unsigned int SAMPLE_RATE;
+	unsigned int CHANNELS;
 } DecoderWriteCtrl;
 
 typedef struct {
 } DecoderDebugCtrl;
 
 typedef struct {
+	unsigned int SAMPLE_RATE;
+	unsigned int CHANNELS;
+	unsigned int FRAME_MS;
 } EncoderReadCtrl;
 
 typedef struct {
@@ -49,46 +54,61 @@ typedef struct {
 } FilterDebugCtrl;
 
 typedef union {
-	DecoderReadCtrl DECODER_R_REG;
-	EncoderReadCtrl ENCODER_R_REG;
-	DecryptReadCtrl DECRYPT_R_REG;
-	EncryptReadCtrl ENCRYPT_R_REG;
-	FilterReadCtrl   FILTER_R_REG;
-} ExtraReadReg;
+	DecoderReadCtrl DECODER;
+	EncoderReadCtrl ENCODER;
+	DecryptReadCtrl DECRYPT;
+	EncryptReadCtrl ENCRYPT;
+	FilterReadCtrl   FILTER;
+} ExtReadReg;
 
 typedef union {
-	DecoderWriteCtrl DECODER_W_REG;
-	EncoderWriteCtrl ENCODER_W_REG;
-	DecryptWriteCtrl DECRYPT_W_REG;
-	EncryptWriteCtrl ENCRYPT_W_REG;
-	FilterWriteCtrl   FILTER_W_REG;
-} ExtraWriteReg;
+	DecoderWriteCtrl DECODER;
+	EncoderWriteCtrl ENCODER;
+	DecryptWriteCtrl DECRYPT;
+	EncryptWriteCtrl ENCRYPT;
+	FilterWriteCtrl   FILTER;
+} ExtWriteReg;
 
 typedef union {
-	DecoderDebugCtrl DECODER_D_REG;
-	EncoderDebugCtrl ENCODER_D_REG;
-	DecryptDebugCtrl DECRYPT_D_REG;
-	EncryptDebugCtrl ENCRYPT_D_REG;
-	FilterDebugCtrl   FILTER_D_REG;
-} ExtraDebugReg;
+	DecoderDebugCtrl DECODER;
+	EncoderDebugCtrl ENCODER;
+	DecryptDebugCtrl DECRYPT;
+	EncryptDebugCtrl ENCRYPT;
+	FilterDebugCtrl   FILTER;
+} ExtDebugReg;
+
+typedef struct {
+	unsigned int I_EXT;
+	unsigned int I_S_ADDR;     /* 绝对起始地址 */
+	unsigned int I_R_ADDR;     /* 相对地址 */
+	unsigned int I_W_ADDR;     /* 相对地址 */
+	unsigned int I_CHANNEL;    /* 多通道个数，例如用于存储非交织数据 */
+	unsigned int I_SIZE;       /* 每个通道的大小 */
+	unsigned int O_EXT;
+	unsigned int O_S_ADDR;
+	unsigned int O_R_ADDR;
+	unsigned int O_W_ADDR;
+	unsigned int O_CHANNEL;
+	unsigned int O_SIZE;
+} ExtBufferReg;
 
 /*************************************************************************
- * INTEN/INT       :
+ * INTEN/INT       :   0  ~ 7    task0 interrupt
+ *                     8  ~ 15   task1 interrupt
+ *                     24        complete stop startup(), do interrupt
  *
- * RUN_CTRL        :   0  ~ 3    task id
- *                     4  ~ 7    task type
- *                     8  ~ 15   codec id
- *                     16 ~ 19   frame num
- *                     24        all task have stopped, and cpu quest reset
- *                     25        start or stop task
- *                     30        run endian
- *                     31        task enable
+ * RUN_ENABLE      :   0         start startup() function
  *
- * IN_CTRL/OUT_CTRL:   0        buffer one or more channel
- *                     1 ~ 3    buffer channel count
- *                     4 ~ 5    buffer store mode
- *                     6        buffer data encrypt
- *                     7        buffer data empty
+ * RUN_CTRL        :   0  ~ 3    run or stop task0 or task1
+ *                     8  ~ 11   task0 id
+ *                     12 ~ 15   task1 id
+ *                     16 ~ 19   task0 do
+ *                     20 ~ 23   task1 do
+ *                     24        stop startup() function
+ *                     31        assign one task
+ *
+ * TASK_QUEQUE    :    0  ~ 3     store task0 or task1
+ *                     4  ~ 7     store task0 or task1
 *************************************************************************/
 
 typedef struct {
@@ -100,81 +120,121 @@ typedef struct {
 	unsigned int RUN_FREQUENCY;              /* 0x110 */
 	unsigned int INTEN;
 	unsigned int INT;
-	unsigned int EXT0;
+	unsigned int RUN_ENABLE;                 /* 0x11c     位置不能改变*/
 	unsigned int RUN_CTRL;                   /* 0x120     位置不能改变*/
 	unsigned int RES2[7];                    /* audio key 位置不能改变*/
-	unsigned int RUN_SAPCE_S_ADDR;           /* 0x140 */
-	unsigned int RUN_SAPCE_SIZE;
-	unsigned int IN_CTRL;
-	unsigned int OUT_CTRL;
-	unsigned int EXT1;                       /* 0x150 */
-	unsigned int IN_BUFFER_S_ADDR;
-	unsigned int IN_BUFFER_SIZE;
-	unsigned int IN_BUFFER_R_ADDR; //相对地址
-	unsigned int IN_BUFFER_W_ADDR; //相对地址/* 0x160 */
-	unsigned int EXT2;
-	unsigned int OUT_BUFFER_S_ADDR;
-	unsigned int OUT_BUFFER_SIZE;
-	unsigned int OUT_BUFFER_R_ADDR;          /* 0x170 */
-	unsigned int OUT_BUFFER_W_ADDR;
-	unsigned int EXTRA_R_TO_SDRAM;
-	unsigned int EXTRA_W_TO_SDRAM;
-	unsigned int EXTRA_D_TO_SDRAM;           /* 0x180 */
-	unsigned int BUFADDR_TO_SDRAM;
-	unsigned int RES3[2];
-	unsigned int CODEC_TYPE;                 /* 0x190 R */
-	unsigned int ERROR_CODE;
-	unsigned int NEED_DATA_NUM;
-	unsigned int RES4[4];
+	unsigned int EXT0;                       /* 0x140 */
+	unsigned int RUN_SPACE_ADDR;
+	unsigned int RUN_SPACE_SIZE;
+	unsigned int EXT1;
+	unsigned int EXT_R_TO_TASK0;             /* 0x150 */
+	unsigned int EXT_W_TO_TASK0;
+	unsigned int EXT_D_TO_TASK0;
+	unsigned int EXT_B_TO_TASK0;
+	unsigned int EXT2;                       /* 0x160 */
+	unsigned int EXT_R_TO_TASK1;
+	unsigned int EXT_W_TO_TASK1;
+	unsigned int EXT_D_TO_TASK1;
+	unsigned int EXT_B_TO_TASK1;             /* 0x170 */
+	unsigned int RES3[7];
+	unsigned int RES4[7];                    /* 0x190 R */
 	unsigned int TASK_QUEQUE;                /* 0x1C8 R 位置不能改变*/
 	unsigned int TASK_WAIT_TIME;             /* 0x1CC */
 } GeneralReg;
 
 typedef enum {
-	REG_BUF_INPUT = 0,
-	REG_BUF_OUTPUT,
-} RegBufType;
+	TASK_NO_0 = (0x1 << 0),
+	TASK_NO_1 = (0x2 << 0)
+} TaskNo;
 
 typedef enum {
-	REG_INT_FINISH    = (0x1<<0),
-	REG_INT_NEED_DATA = (0x1<<1),
-	REG_INT_OVER      = (0x1<<2),
-	REG_INT_INIT_OK   = (0x1<<4),
-	REG_INT_RESET_OK  = (0x1<<5),
-} RegIntType;
+	TASK_START = (0x1 << 2),
+	TASK_STOP  = (0x2 << 2),
+} TaskAction;
 
 typedef enum {
-	REG_TASK_QUEUE0 = (0x1<<0),
-	REG_TASK_QUEUE1 = (0x1<<1)
-} RegTaskQueue;
+	TASK_NONE    = 0,
+	TASK_DECODER,
+	TASK_ENCODER,
+	TASK_DECRYPT,
+	TASK_ENCRYPT,
+	TASK_FILTER
+} TaskDo;
+
+typedef enum {
+	TASK_QUEQUE_0 = (0x1 << 0),
+	TASK_QUEQUE_1 = (0x1 << 1),
+} TaskQueue;
+
+typedef enum {
+	BUFFER_I = 0,
+	BUFFER_O,
+} BufferIO;
+
+typedef enum {
+	ISR_TASK_NO_0_FINISH    = (0x1<<0),
+	ISR_TASK_NO_0_NEED      = (0x1<<1),
+	ISR_TASK_NO_0_OVER      = (0x1<<2),
+	ISR_TASK_NO_0_STOP      = (0x1<<3),
+
+	ISR_TASK_NO_1_FINISH    = (0x1<<8),
+	ISR_TASK_NO_1_NEED      = (0x1<<9),
+	ISR_TASK_NO_1_OVER      = (0x1<<10),
+	ISR_TASK_NO_1_STOP      = (0x1<<11),
+
+	ISR_ENABLE_OK    = (0x1<<23),
+	ISR_DISABLE_OK   = (0x1<<24),
+} IsrType;
+
+typedef enum {
+	DECODER_ERROR = -88,
+} ErrorCode;
+
+typedef int (*IsrFunc)(void);
+
+extern void register_init(GeneralReg *reg, IsrFunc func);
+extern void register_destroy(void);
+
+extern void           reg_enable_run  (void);
+extern void           reg_disable_run (void);
+extern unsigned int   reg_disable_get (void);
+extern void           reg_enable_task (void);
+extern void           reg_clear_task  (TaskQueue queue);
+
+extern void           reg_set_task_isr(IsrType isr);
+extern void           reg_clr_task_isr(IsrType isr);
+extern void           reg_clr_all_task_isr(void);
+extern unsigned int   reg_get_task_isr(void);
+extern void           reg_set_task_isr_en(IsrType isr);
+extern void           reg_clr_task_isr_en(IsrType isr);
+extern void           reg_clr_all_task_isr_en(void);
+extern unsigned int   reg_get_task_isr_en(void);
 
 extern unsigned int   reg_get_run_frequency (void);
-extern unsigned char* reg_get_run_space_addr (void);
-extern unsigned int   reg_get_run_space_size (void);
-extern unsigned char* reg_get_buffer_addr    (RegBufType type);
-extern unsigned int   reg_get_buffer_size    (RegBufType type);
-extern unsigned int   reg_get_buffer_r_addr  (RegBufType type);
-extern unsigned int   reg_get_buffer_w_addr  (RegBufType type);
-extern unsigned int   reg_get_buffer_count   (RegBufType type);
-extern unsigned int   reg_get_codec_id       (void);
-extern unsigned int   reg_get_task_enable    (void);
-extern unsigned int   reg_get_task_id        (void);
-extern unsigned int   reg_get_task_do        (void);
-extern unsigned int   reg_get_task_queue     (RegTaskQueue queue);
-extern unsigned int   reg_get_request_reset  (void);
+extern unsigned char* reg_get_run_space_addr(void);
+extern unsigned int   reg_get_run_space_size(void);
+extern TaskNo         reg_get_task_no       (void);
+extern TaskAction     reg_get_task_action   (void);
+extern unsigned int   reg_get_task_id       (TaskNo  no);
+extern TaskDo         reg_get_task_do       (TaskNo  no);
 
-extern void reg_set_interrupt_type(RegIntType type);
-extern void reg_set_buffer_r_addr (RegBufType type, unsigned int addr);
-extern void reg_set_buffer_w_addr (RegBufType type, unsigned int addr);
-extern void reg_set_task_enable   (unsigned int enable);
-extern void reg_set_task_queue    (RegTaskQueue queue, unsigned int value);
-extern void reg_set_codec_type    (unsigned int codecType);
-extern void reg_set_error_code    (unsigned int errorCode);
+extern void reg_set_run_frequency (unsigned int   freq);
+extern void reg_set_run_space_addr(unsigned char *addr);
+extern void reg_set_run_space_size(unsigned int   size);
 
-extern ExtraReadReg*  reg_get_extra_read_addr (void);
-extern ExtraWriteReg* reg_get_extra_write_addr(void);
-extern ExtraDebugReg* reg_get_extra_debug_addr(void);
+extern ExtReadReg*    reg_get_ext_read_reg (TaskNo no);
+extern ExtWriteReg*   reg_get_ext_write_reg(TaskNo no);
+extern ExtDebugReg*   reg_get_ext_debug_reg(TaskNo no);
+extern void           ext_reg_set(unsigned int *reg, unsigned int value);
+extern unsigned int   ext_reg_get(unsigned int *reg);
 
-extern void         extra_reg_set(unsigned int *reg, unsigned int value);
-extern unsigned int extra_reg_get(unsigned int *reg);
+extern ExtBufferReg*  reg_get_ext_buffer_reg (TaskNo no);
+extern unsigned char* ext_reg_get_buf_addr   (ExtBufferReg *reg, BufferIO io);
+extern unsigned int   ext_reg_get_buf_size   (ExtBufferReg *reg, BufferIO io);
+extern unsigned int   ext_reg_get_buf_r_addr (ExtBufferReg *reg, BufferIO io);
+extern unsigned int   ext_reg_get_buf_w_addr (ExtBufferReg *reg, BufferIO io);
+extern unsigned int   ext_reg_get_buf_channel(ExtBufferReg *reg, BufferIO io);
+extern void           ext_reg_set_buf_r_addr (ExtBufferReg *reg, BufferIO io, unsigned int addr);
+extern void           ext_reg_set_buf_w_addr (ExtBufferReg *reg, BufferIO io, unsigned int addr);
+
 #endif

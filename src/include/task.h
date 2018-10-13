@@ -11,15 +11,6 @@ typedef enum {
 } TaskStatus;
 
 typedef enum {
-	TASK_DO_STOP    = 0,
-	TASK_DO_DECODER = 1,
-	TASK_DO_ENCODER = 2,
-	TASK_DO_DECRYPT = 3,
-	TASK_DO_ENCRYPT = 4,
-	TASK_DO_FILTER  = 5
-} TaskDo;
-
-typedef enum {
 	TASK_DO_ERROR     = -1,
 	TASK_DO_FINISH    = 0,
 	TASK_DO_NEED_DATA = 1,
@@ -27,12 +18,12 @@ typedef enum {
 } TaskDoResult;
 
 typedef struct {
-	CodecID          codec_id;
-	OsBufferHandle   *in_buf;
-	OsBufferHandle   *out_buf;
-	ExtraReadReg     *r_ctrl;
-	ExtraWriteReg    *w_ctrl;
-	ExtraDebugReg    *d_ctrl;
+	OsBufferHandle *in_buf;
+	OsBufferHandle *out_buf;
+	ExtReadReg     *r_ctrl;
+	ExtWriteReg    *w_ctrl;
+	ExtDebugReg    *d_ctrl;
+	ExtBufferReg   *b_ctrl;
 } TaskDoParam;
 
 typedef struct {
@@ -45,7 +36,7 @@ typedef struct {
 	void         *priv_context;
 } TaskContext;
 
-extern int            task_create (int taskID, TaskDo taskDo);
+extern int            task_create (int taskID, TaskDo taskDo, TaskNo taskNo);
 extern void           task_destory(int taskID);
 extern TaskDoResult   task_process(int taskID);
 extern TaskStatus     task_status (int taskID);

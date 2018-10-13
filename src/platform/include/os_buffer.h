@@ -1,10 +1,7 @@
 #ifndef __OS_BUFFER_H__
 #define __OS_BUFFER_H__
 
-typedef enum {
-	OS_BUFFER_INPUT  = 0,
-	OS_BUFFER_OUTPUT = 1,
-} OsBufferType;
+#include "register.h"
 
 typedef enum {
 	OS_BUFFER_R_ATTR = (0x1 << 0),
@@ -30,7 +27,8 @@ typedef enum {
  **********         <-------- (w) ******************
  ***************************************************/
 typedef struct {
-	OsBufferType   type;
+	BufferIO       io;
+	ExtBufferReg  *reg;
 	unsigned char *addr;
 	unsigned int   channel;   //buffer个数, 至少一个channel
 	unsigned int   size;     //每个channel buffer的长度
@@ -38,7 +36,7 @@ typedef struct {
 	unsigned int   w_addr;   //相对地址,记录第一个channel buffer的写指针
 } OsBufferHandle;
 
-extern OsBufferHandle *os_buffer_open(OsBufferType type);
+extern OsBufferHandle *os_buffer_open(BufferIO io, ExtBufferReg *reg);
 
 extern void os_buffer_close(OsBufferHandle *handle);
 
