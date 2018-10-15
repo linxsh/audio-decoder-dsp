@@ -12,9 +12,9 @@ typedef enum {
 
 typedef enum {
 	TASK_DO_ERROR     = -1,
-	TASK_DO_FINISH    = 0,
-	TASK_DO_NEED_DATA = 1,
-	TASK_DO_OVER      = 2,
+	TASK_DO_FINISH    =  0,
+	TASK_DO_DATA_LESS =  1,
+	TASK_DO_DATA_EOF  =  2,
 } TaskDoResult;
 
 typedef struct {

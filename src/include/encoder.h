@@ -8,8 +8,8 @@
 typedef enum {
 	ENCODEC_ERROR     = -1,
 	ENCODEC_FINISH    =  0,
-	ENCODEC_NEED_DATA =  1,
-	ENCODEC_OVER      =  2
+	ENCODEC_DATA_LESS =  1,
+	ENCODEC_DATA_EOF =  2
 } EncoderStatus;
 
 typedef void EncoderContext;

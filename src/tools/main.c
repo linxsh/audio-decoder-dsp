@@ -86,9 +86,9 @@ int start_up(void)
 			task_destory(taskID);
 
 			if (TASK_NO_0 == taskNo)
-				reg_set_task_isr(ISR_TASK_NO_0_OVER);
+				reg_set_task_isr(ISR_TASK_NO_0_STOP);
 			if (TASK_NO_1 == taskNo)
-				reg_set_task_isr(ISR_TASK_NO_1_OVER);
+				reg_set_task_isr(ISR_TASK_NO_1_STOP);
 
 			continue;
 		} else {
@@ -103,9 +103,9 @@ int start_up(void)
 				break;
 			case TASK_DO_FINISH:
 				break;
-			case TASK_DO_OVER:
+			case TASK_DO_DATA_LESS:
 				break;
-			case TASK_DO_NEED_DATA:
+			case TASK_DO_DATA_EOF:
 				break;
 			default:
 				break;

@@ -8,8 +8,8 @@
 typedef enum {
 	DECODEC_ERROR     = -1,
 	DECODEC_FINISH    =  0,
-	DECODEC_NEED_DATA =  1,
-	DECODEC_OVER      =  2
+	DECODEC_DATA_LESS =  1,
+	DECODEC_DATA_EOF  =  2
 } DecoderStatus;
 
 typedef void DecoderContext;

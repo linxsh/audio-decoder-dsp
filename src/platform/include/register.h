@@ -17,10 +17,18 @@ typedef struct {
 typedef struct {
 	unsigned int SAMPLE_RATE;
 	unsigned int CHANNELS;
+	unsigned int BITS;
 	unsigned int FRAME_MS;
+	unsigned int BIT_RATE;
+	unsigned int CBR;
+	unsigned int CVBR;
+	unsigned int COMPLEXITY;
+	unsigned int EXPECT_LOSS;
 } EncoderReadCtrl;
 
 typedef struct {
+	unsigned int ERROR_CODE;
+	unsigned int DATA_LESS_NUM;
 } EncoderWriteCtrl;
 
 typedef struct {
@@ -84,12 +92,15 @@ typedef struct {
 	unsigned int I_W_ADDR;     /* 相对地址 */
 	unsigned int I_CHANNEL;    /* 多通道个数，例如用于存储非交织数据 */
 	unsigned int I_SIZE;       /* 每个通道的大小 */
+	unsigned int I_LOOP;       /* 通道填满, W_ADDR == R_ADDR */
+	unsigned int I_EOF;        /* 通道写数据时，结束标记*/
 	unsigned int O_EXT;
 	unsigned int O_S_ADDR;
 	unsigned int O_R_ADDR;
 	unsigned int O_W_ADDR;
 	unsigned int O_CHANNEL;
 	unsigned int O_SIZE;
+	unsigned int O_LOOP;
 } ExtBufferReg;
 
 /*************************************************************************
@@ -172,15 +183,15 @@ typedef enum {
 } BufferIO;
 
 typedef enum {
-	ISR_TASK_NO_0_FINISH    = (0x1<<0),
-	ISR_TASK_NO_0_NEED      = (0x1<<1),
-	ISR_TASK_NO_0_OVER      = (0x1<<2),
-	ISR_TASK_NO_0_STOP      = (0x1<<3),
+	ISR_TASK_NO_0_FINISH    = (0x1 << 0),
+	ISR_TASK_NO_0_STOP      = (0x1 << 1),
+	ISR_TASK_NO_0_DATA_LESS = (0x1 << 2),
+	ISR_TASK_NO_0_DATA_EOF  = (0x1 << 3),
 
-	ISR_TASK_NO_1_FINISH    = (0x1<<8),
-	ISR_TASK_NO_1_NEED      = (0x1<<9),
-	ISR_TASK_NO_1_OVER      = (0x1<<10),
-	ISR_TASK_NO_1_STOP      = (0x1<<11),
+	ISR_TASK_NO_1_FINISH    = (0x1 << 8),
+	ISR_TASK_NO_1_STOP      = (0x1 << 9),
+	ISR_TASK_NO_1_DATA_LESS = (0x1 << 10),
+	ISR_TASK_NO_1_DATA_EOF  = (0x1 << 11),
 
 	ISR_ENABLE_OK    = (0x1<<23),
 	ISR_DISABLE_OK   = (0x1<<24),
@@ -234,7 +245,11 @@ extern unsigned int   ext_reg_get_buf_size   (ExtBufferReg *reg, BufferIO io);
 extern unsigned int   ext_reg_get_buf_r_addr (ExtBufferReg *reg, BufferIO io);
 extern unsigned int   ext_reg_get_buf_w_addr (ExtBufferReg *reg, BufferIO io);
 extern unsigned int   ext_reg_get_buf_channel(ExtBufferReg *reg, BufferIO io);
+extern unsigned int   ext_reg_get_buf_loop   (ExtBufferReg *reg, BufferIO io);
+extern unsigned int   ext_reg_get_buf_eof    (ExtBufferReg *reg, BufferIO io);
 extern void           ext_reg_set_buf_r_addr (ExtBufferReg *reg, BufferIO io, unsigned int addr);
 extern void           ext_reg_set_buf_w_addr (ExtBufferReg *reg, BufferIO io, unsigned int addr);
+extern void           ext_reg_set_buf_loop   (ExtBufferReg *reg, BufferIO io, unsigned int loop);
+extern void           ext_reg_set_buf_eof    (ExtBufferReg *reg, BufferIO io, unsigned int eof);
 
 #endif

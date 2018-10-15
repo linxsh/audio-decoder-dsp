@@ -1,3 +1,13 @@
+/*****************************************************************************
+ * Author : linxsh
+ * Type : Source
+ * File Name : register.c
+ * Describle : Two different threads or hardware communication
+ * Release History:
+ * VERSION Date        AUTHOR    Description
+ * 1.2-1   2018.09.24  linxsh    creation
+ * ***************************************************************************/
+
 #include "os_define.h"
 #include "register.h"
 #include "log_printf.h"
@@ -524,6 +534,24 @@ unsigned int ext_reg_get_buf_channel(ExtBufferReg *reg, BufferIO io)
 	return 0;
 }
 
+unsigned int ext_reg_get_buf_loop(ExtBufferReg *reg, BufferIO io)
+{
+	if (BUFFER_I == io)
+		return REG_GET_VAL(&(reg->I_LOOP));
+	else if (BUFFER_O == io)
+		return REG_GET_VAL(&(reg->O_LOOP));
+
+	return 0;
+}
+
+unsigned int ext_reg_get_buf_eof(ExtBufferReg *reg, BufferIO io)
+{
+	if (BUFFER_I == io)
+		return REG_GET_VAL(&(reg->I_EOF));
+
+	return 0;
+}
+
 void ext_reg_set_buf_r_addr(ExtBufferReg *reg, BufferIO io, unsigned int addr)
 {
 	if (BUFFER_I == io)
@@ -538,6 +566,20 @@ void ext_reg_set_buf_w_addr(ExtBufferReg *reg, BufferIO io, unsigned int addr)
 		REG_SET_VAL(&(reg->I_W_ADDR), addr);
 	else if (BUFFER_O == io)
 		REG_SET_VAL(&(reg->O_W_ADDR), addr);
+}
+
+void ext_reg_set_buf_loop(ExtBufferReg *reg, BufferIO io, unsigned int loop)
+{
+	if (BUFFER_I == io)
+		REG_SET_VAL(&(reg->I_LOOP), loop);
+	else if (BUFFER_O == io)
+		REG_SET_VAL(&(reg->O_LOOP), loop);
+}
+
+void ext_reg_set_buf_eof(ExtBufferReg *reg, BufferIO io, unsigned int eof)
+{
+	if (BUFFER_I == io)
+		REG_SET_VAL(&(reg->I_EOF), eof);
 }
 
 void ext_reg_set(unsigned int *reg, unsigned int value)

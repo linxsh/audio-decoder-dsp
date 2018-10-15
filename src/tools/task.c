@@ -126,10 +126,10 @@ TaskDoResult task_process(int taskID)
 
 		if (DECODEC_FINISH == decStatus)
 			taskDoResult = TASK_DO_FINISH;
-		else if (DECODEC_NEED_DATA == decStatus)
-			taskDoResult = TASK_DO_NEED_DATA;
-		else if (DECODEC_OVER == decStatus)
-			taskDoResult = TASK_DO_OVER;
+		else if (DECODEC_DATA_LESS == decStatus)
+			taskDoResult = TASK_DO_DATA_LESS;
+		else if (DECODEC_DATA_EOF == decStatus)
+			taskDoResult = TASK_DO_DATA_EOF;
 		else
 			taskDoResult = TASK_DO_ERROR;
 	}

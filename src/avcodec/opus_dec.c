@@ -119,14 +119,14 @@ static DecoderStatus opus_dec_decode(DecoderContext *dec)
 		unsigned int bytes;
 
 		bytes = ogg_sync_buffer(&opusDec->oy, 1024, opusDec->in);
-		if (OS_BUFFER_NEED == bytes) {
+		if (OS_BUFFER_DATA_LESS == bytes) {
 			log_printf(OPUS_DEC_MODULE, LEVEL_DEBU, "%s %d: OPUS data less\n", __FUNCTION__, __LINE__);
 			opusDec->state = OPUS_READ_DATA;
-			return DECODEC_NEED_DATA;
-		} else if (OS_BUFFER_EMPTY == bytes) {
+			return DECODEC_DATA_LESS;
+		} else if (OS_BUFFER_DATA_EOF == bytes) {
 			log_printf(OPUS_DEC_MODULE, LEVEL_DEBU, "%s %d: OPUS data empty\n", __FUNCTION__, __LINE__);
 			opusDec->state = OPUS_READ_DATA;
-			return DECODEC_OVER;
+			return DECODEC_DATA_EOF;
 		}
 		ogg_sync_wrote(&opusDec->oy, bytes);
 

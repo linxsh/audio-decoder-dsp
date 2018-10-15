@@ -1,3 +1,13 @@
+/*****************************************************************************
+ * Author : linxsh
+ * Type : Source
+ * File Name : os_malloc.c
+ * Describle : buffer malloc manager
+ * Release History:
+ * VERSION Date        AUTHOR    Description
+ * 1.2-1   2018.09.24  linxsh    creation
+ * ***************************************************************************/
+
 #include "os_define.h"
 #include "os_malloc.h"
 #include "log_printf.h"

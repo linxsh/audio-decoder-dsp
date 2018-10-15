@@ -1,3 +1,13 @@
+/*****************************************************************************
+ * Author : linxsh
+ * Type : Source
+ * File Name : os_buffer.c
+ * Describle : i/o buffer/fifo manager
+ * Release History:
+ * VERSION Date        AUTHOR    Description
+ * 1.2-1   2018.09.24  linxsh    creation
+ * ***************************************************************************/
+
 #include "os_define.h"
 #include "register.h"
 #include "os_buffer.h"
@@ -74,6 +84,11 @@ int os_buffer_update_from(OsBufferHandle *handle, OsBufferAttr rw)
 	if (rw & OS_BUFFER_W_ATTR)
 		handle->w_addr = ext_reg_get_buf_w_addr(handle->reg, handle->io);
 
+	if ((rw & OS_BUFFER_R_ATTR) || (rw & OS_BUFFER_W_ATTR)) {
+		handle->loop = ext_reg_get_buf_loop(handle->reg, handle->io);
+		handle->eof  = ext_reg_get_buf_eof (handle->reg, handle->io);
+	}
+
 	return 0;
 }
 
@@ -87,21 +102,51 @@ int os_buffer_update_to(OsBufferHandle *handle, OsBufferAttr rw)
 	if (rw & OS_BUFFER_W_ATTR)
 		ext_reg_set_buf_w_addr(handle->reg, handle->io, handle->w_addr);
 
+	if ((rw & OS_BUFFER_R_ATTR) || (rw & OS_BUFFER_W_ATTR)) {
+		ext_reg_set_buf_loop(handle->reg, handle->io, handle->loop);
+		ext_reg_set_buf_eof (handle->reg, handle->io, handle->eof);
+	}
+
 	return 0;
 }
 
-int os_buffer_check(OsBufferHandle *handle, unsigned int length)
+OsBufferState os_buffer_check(OsBufferHandle *handle,
+		unsigned int length,
+		unsigned int *freeLength,
+		unsigned int *fillLength)
 {
+	unsigned int freeLen, fillLen;
 	check_buffer(handle);
 
 	if (length > handle->size) {
 		log_printf(COMMON_MODULE, LEVEL_ERRO,
 				"%s %d: length(%d) size(%d)\n",
 				__FUNCTION__, __LINE__, length, handle->size);
-		return -1;
+		return OS_BUFFER_ERROR;
 	}
 
-	return 0;
+	if (handle->loop)
+		fillLen = handle->size;
+	else if (handle->w_addr >= handle->r_addr)
+		fillLen = handle->w_addr - handle->r_addr;
+	else
+		fillLen = handle->size + handle->w_addr - handle->r_addr;
+
+	freeLen = handle->size - fillLen;
+	if (freeLength)
+		*freeLength = freeLen;
+	if (fillLength)
+		*fillLength = fillLen;
+
+	if (BUFFER_I == handle->io) {
+		if (length > fillLen)
+			return (handle->eof) ? OS_BUFFER_DATA_EOF : OS_BUFFER_DATA_LESS;
+	} else if (BUFFER_O == handle->io) {
+		if (length > freeLen)
+			return OS_BUFFER_DATA_FULL;
+	}
+
+	return OS_BUFFER_OK;
 }
 
 int os_buffer_read(OsBufferHandle *handle,
@@ -132,6 +177,7 @@ int os_buffer_read(OsBufferHandle *handle,
 	if (update) {
 		unsigned int tmp = handle->r_addr + length;
 		handle->r_addr = (tmp >= handle->size) ? (tmp - handle->size) : tmp;
+		handle->loop   = (length > 0) ? 0 : handle->loop;
 	}
 
 	return 0;
@@ -165,7 +211,13 @@ int os_buffer_write(OsBufferHandle *handle,
 	if (update) {
 		unsigned int tmp = handle->w_addr + length;
 		handle->w_addr = (tmp >= handle->size) ? (tmp - handle->size) : tmp;
+		handle->loop   = ((handle->r_addr == handle->w_addr) && (length > 0)) ? 1 : handle->loop;
 	}
 
 	return 0;
+}
+
+unsigned int os_buffer_get_channel(OsBufferHandle *handle)
+{
+	return handle->channel;
 }
