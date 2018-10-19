@@ -50,7 +50,6 @@ static EncoderContext* opus_enc_init(OsBufferHandle *in,
 		EncoderWriteCtrl *wCtrl)
 {
 	OpusEncContext *opusEnc    = os_malloc(sizeof(OpusEncContext));
-	OpusHeader     *opusHeader = NULL;
 	unsigned int   frameMS;
 	unsigned int   application;
 	int ret = 0;
@@ -59,97 +58,76 @@ static EncoderContext* opus_enc_init(OsBufferHandle *in,
 		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "malloc error\n");
 		return NULL;
 	}
+	os_memset(opusEnc, 0, sizeof(OpusEncContext));
 
 	frameMS          = ext_reg_get(&(rCtrl->FRAME_MS));
 	opusEnc->bits    = ext_reg_get(&(rCtrl->BITS));
-	opusEnc->bitRate = ext_reg_get(&(rCtrl->BIT_RATE));
 	opusEnc->cbr     = ext_reg_get(&(rCtrl->CBR));
 	opusEnc->cvbr    = ext_reg_get(&(rCtrl->CVBR));
+	opusEnc->bitRate = ext_reg_get(&(rCtrl->BIT_RATE));
 	opusEnc->complexity  = ext_reg_get(&(rCtrl->COMPLEXITY));
 	opusEnc->expect_loss = ext_reg_get(&(rCtrl->EXPECT_LOSS));
 	application = (frameMS < 10) ? OPUS_APPLICATION_RESTRICTED_LOWDELAY:OPUS_APPLICATION_AUDIO;
-	opusHeader  = &opusEnc->header;
-	opusHeader->input_sample_rate = ext_reg_get(&(rCtrl->SAMPLE_RATE));
-	opusHeader->channels          = ext_reg_get(&(rCtrl->CHANNELS));
-	opusHeader->channel_mapping   = (opusHeader->channels > 8) ? 255 : (opusHeader->channels > 2);
+	opusEnc->header.input_sample_rate = ext_reg_get(&(rCtrl->SAMPLE_RATE));
+	opusEnc->header.channels          = ext_reg_get(&(rCtrl->CHANNELS));
+	opusEnc->header.channel_mapping   = (opusEnc->header.channels > 8) ? 255 : (opusEnc->header.channels > 2);
 
-	opusEnc->st = opus_multistream_surround_encoder_create(opusHeader->input_sample_rate,
-			opusHeader->channels, opusHeader->channel_mapping,
-			&opusHeader->nb_streams, &opusHeader->nb_coupled,
-			opusHeader->stream_map, application, &ret);
-
-	opusEnc->i_frame_size  = frameMS * opusHeader->input_sample_rate / 1000;
-	opusEnc->i_frame_bytes = (opusEnc->i_frame_size * opusEnc->header.channels * opusEnc->bits / 8);
-	if (opusEnc->i_frame_bytes > OPUS_ENC_I_FRAME_BYTES) {
-		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder opus o_frame_bytes (%d)\n", opusEnc->o_frame_bytes);
-		return NULL;
+	opusEnc->st = opus_multistream_surround_encoder_create(opusEnc->header.input_sample_rate,
+			opusEnc->header.channels,
+			opusEnc->header.channel_mapping,
+			&opusEnc->header.nb_streams,
+			&opusEnc->header.nb_coupled,
+			opusEnc->header.stream_map,
+			application,
+			&ret);
+	if (ret != OPUS_OK) {
+		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder create error\n");
+		goto OPUS_OPEN_ERR;
 	}
 
-	opusEnc->o_frame_bytes = (1275 * 3 + 7) * opusHeader->nb_streams;
+	opusEnc->i_frame_size  = frameMS * opusEnc->header.input_sample_rate / 1000;
+	opusEnc->i_frame_bytes = (opusEnc->i_frame_size * opusEnc->bits / 8);
+	opusEnc->o_frame_bytes = (1275 * 3 + 7) * opusEnc->header.nb_streams;
+
+	if ((opusEnc->i_frame_bytes * opusEnc->header.channels) > OPUS_ENC_I_FRAME_BYTES) {
+		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder opus o_frame_bytes (%d)\n", opusEnc->o_frame_bytes);
+		goto OPUS_OPEN_ERR;
+	}
+
 	if (opusEnc->o_frame_bytes > OPUS_ENC_O_FRAME_BYTES) {
 		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder opus o_frame_bytes (%d)\n", opusEnc->o_frame_bytes);
-		return NULL;
+		goto OPUS_OPEN_ERR;
 	}
 
 	if (opusEnc->bitRate <= 0) {
-		opusEnc->bitRate = ((64000 * opusHeader->nb_streams + 32000 * opusHeader->nb_coupled) *
-				(IMIN(48, IMAX(8, ((opusHeader->input_sample_rate < 44100 ? opusHeader->input_sample_rate : 48000) + 1000) / 1000)) + 16) + 32) >> 6;
+		unsigned int sampleRate = opusEnc->header.input_sample_rate;
+		opusEnc->bitRate = ((64000 * opusEnc->header.nb_streams + 32000 * opusEnc->header.nb_coupled) *
+				(IMIN(48, IMAX(8, (( sampleRate < 44100 ? sampleRate : 48000) + 1000) / 1000)) + 16) + 32) >> 6;
 	}
 
-	if ((opusEnc->bitRate > (1024000 * opusHeader->channels)) || (opusEnc->bitRate < 500)) {
+	if ((opusEnc->bitRate > (1024000 * opusEnc->header.channels)) || (opusEnc->bitRate < 500)) {
 		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus bit rate(%d) error\n", opusEnc->bitRate);
 		goto OPUS_OPEN_ERR;
 	}
-	opusEnc->bitRate = IMIN(opusHeader->channels * 256000, opusEnc->bitRate);
+	opusEnc->bitRate = IMIN(opusEnc->header.channels * 256000, opusEnc->bitRate);
 
 	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "enc frame time: %d(ms)\n",     frameMS);
-	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "sample rate:    %d(hz)\n",     opusHeader->input_sample_rate);
-	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "channels:       %d\n",         opusHeader->channels);
+	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "sample rate:    %d(hz)\n",     opusEnc->header.input_sample_rate);
+	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "channels:       %d\n",         opusEnc->header.channels);
 	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "enc bit rate:   %d(byte/s)\n", opusEnc->bitRate);
 	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "enc cbr:        %d\n",         opusEnc->cbr);
 	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "enc cvbr:       %d\n",         opusEnc->cvbr);
 	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "i frame bytes:  %d(byte)\n",   opusEnc->i_frame_size);
 	log_printf(OPUS_ENC_MODULE, LEVEL_INFO, "o frame bytes:  %d(byte)\n",   opusEnc->o_frame_bytes);
 
-	ret = opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_BITRATE(opusEnc->bitRate));
-	if (ret != OPUS_OK) {
-		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder set bitrate error\n");
-		goto OPUS_OPEN_ERR;
-	}
+	opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_BITRATE(opusEnc->bitRate));
+	opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_VBR(!opusEnc->cbr));
+	opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_VBR_CONSTRAINT(opusEnc->cvbr));
+	opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_COMPLEXITY(opusEnc->complexity));
+	opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_PACKET_LOSS_PERC(opusEnc->expect_loss));
+	opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_LSB_DEPTH(IMAX(8, IMIN(24, opusEnc->bits))));
 
-	ret = opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_VBR(!opusEnc->cbr));
-	if (ret != OPUS_OK) {
-		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder set cbr error\n");
-		goto OPUS_OPEN_ERR;
-	}
-
-	if (!opusEnc->cbr) {
-		ret = opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_VBR_CONSTRAINT(opusEnc->cvbr));
-		if (ret != OPUS_OK) {
-			log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder set cvbr error\n");
-			goto OPUS_OPEN_ERR;
-		}
-	}
-
-	ret = opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_COMPLEXITY(opusEnc->complexity));
-	if (ret != OPUS_OK) {
-		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder set complexity error\n");
-		goto OPUS_OPEN_ERR;
-	}
-
-	ret = opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_PACKET_LOSS_PERC(opusEnc->expect_loss));
-	if (ret != OPUS_OK) {
-		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder set loss expect error\n");
-		goto OPUS_OPEN_ERR;
-	}
-
-	ret = opus_multistream_encoder_ctl(opusEnc->st, OPUS_SET_LSB_DEPTH(IMAX(8, IMIN(24, opusEnc->bits))));
-	if (ret != OPUS_OK) {
-		log_printf(OPUS_ENC_MODULE, LEVEL_ERRO, "opus encoder set bits(%d) error\n", opusEnc->bits);
-		goto OPUS_OPEN_ERR;
-	}
-
-	opusEnc->header_len = opus_header_to_packet(opusHeader, opusEnc->header_data, sizeof(opusEnc->header_data));
+	opusEnc->header_len = opus_header_to_packet(&opusEnc->header, opusEnc->header_data, sizeof(opusEnc->header_data));
 	opusEnc->in  = in;
 	opusEnc->out = out;
 	opusEnc->r_ctrl = rCtrl;
@@ -179,9 +157,9 @@ static EncoderStatus opus_enc_encode(EncoderContext *enc)
 	int errorCode = 0;
 
 	if (os_buffer_get_channel(opusEnc->in) == 1)
-		needFrameBytes = opusEnc->i_frame_bytes;
+		needFrameBytes = opusEnc->i_frame_bytes * opusEnc->header.channels;
 	else
-		needFrameBytes = opusEnc->i_frame_size * opusEnc->bits / 8;
+		needFrameBytes = opusEnc->i_frame_bytes;
 
 	bufferResult = os_buffer_check(opusEnc->in, needFrameBytes, NULL, &fillFrameBytes);
 	if (OS_BUFFER_DATA_LESS == bufferResult) {
@@ -250,8 +228,8 @@ OPUS_ENC_EXIT:
 	os_free(i_buffer);
 	os_free(o_buffer);
 #endif
-	return ((errorCode == 0) ? ENCODEC_FINISH : ENCODEC_ERROR);
 
+	return ((errorCode == 0) ? ENCODEC_FINISH : ENCODEC_ERROR);
 }
 
 static void opus_enc_free(EncoderContext *enc)
