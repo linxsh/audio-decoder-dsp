@@ -84,7 +84,6 @@ libavutils.a: $(AVUTILS_OBJECTS)
 libavutils.inst:
 	@mv libavutils.a ../install/lib
 ###########################################################################
-
 ifneq ($(MAKECMDGOALS), clean)
 -include $(API_DEPENDS)
 -include $(AVCODEC_DEPENDS)
@@ -103,4 +102,3 @@ endif
 clean:
 	@find ./ -name "*.o"|xargs rm -f
 	@find ./ -name "*.d"|xargs rm -f
-	@find ./ -name "*.a"|xargs rm -f

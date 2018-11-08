@@ -1,7 +1,6 @@
 #include "os_define.h"
 #include "register.h"
 #include "os_buffer.h"
-#include "format.h"
 #include "task.h"
 #include "log_printf.h"
 #include "list.h"

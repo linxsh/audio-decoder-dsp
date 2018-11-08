@@ -4,7 +4,6 @@
 #include "os_buffer.h"
 #include "os_malloc.h"
 #include "log_printf.h"
-#include "format.h"
 #include "task.h"
 
 int start_up(void)

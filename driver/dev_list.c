@@ -1,5 +1,6 @@
 #include "kernelcall.h"
 #include "register.h"
+#include "stream_types.h"
 #include "dev_stream.h"
 #include "dev_list.h"
 
@@ -10,10 +11,10 @@ typedef struct {
 } SubDevList;
 
 static SubDevList sSubDevList[] = {
-	{0, NULL, "dev-0", NULL},
-	{0, NULL, "dev-1", NULL},
-	{0, NULL, "dev-2", NULL},
-	{0, NULL, "dev-3", NULL}
+	{0, NULL, "dev-0"},
+	{0, NULL, "dev-1"},
+	{0, NULL, "dev-2"},
+	{0, NULL, "dev-3"}
 };
 
 static DevStream *dev = NULL;

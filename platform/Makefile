@@ -31,7 +31,6 @@ ARFLAGS := -rcs
 all: prepare $(LIBS-y) install
 
 prepare:
-	@mkdir -p ../install/include/os
 	@echo "\033[31;36m$(LIBS-y) compiling..\033[0m"
 
 libx86.a: $(OBJECTS)
@@ -41,8 +40,7 @@ libdsp32.a: $(OBJECTS)
 	@$(AR) $(ARFLAGS) $@ $^
 
 install:
-	@mv *.a        ../install/lib
-	@cp include/*  ../install/include/os -rf
+	@mv *.a ../install/lib
 
 ifneq ($(MAKECMDGOALS), clean)
 -include $(DEPENDS)

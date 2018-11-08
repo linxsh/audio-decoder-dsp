@@ -552,6 +552,36 @@ unsigned int ext_reg_get_buf_eof(ExtBufferReg *reg, BufferIO io)
 	return 0;
 }
 
+void ext_reg_set_buf_addr(ExtBufferReg *reg, BufferIO io, unsigned char *addr)
+{
+#ifdef CONFIG_DSP32
+	unsigned int baseAddr = (unsigned int)addr;
+
+	if (BUFFER_I == io)
+		REG_SET_VAL(&(reg->I_S_ADDR), baseAddr);
+	else if (BUFFER_O == io)
+		REG_SET_VAL(&(reg->O_S_ADDR), baseAddr);
+#else
+	unsigned int baseAddr = ((unsigned long long)addr) & 0xffffffff;
+	unsigned int highBaseAddr = (((unsigned long long)addr) >> 32) & 0xffffffff;
+	if (BUFFER_I == io) {
+		REG_SET_VAL(&(reg->I_EXT),    highBaseAddr);
+		REG_SET_VAL(&(reg->I_S_ADDR), baseAddr);
+	} else if (BUFFER_O == io) {
+		REG_SET_VAL(&(reg->O_EXT),    highBaseAddr);
+		REG_SET_VAL(&(reg->O_S_ADDR), baseAddr);
+	}
+#endif
+}
+
+void ext_reg_set_buf_size(ExtBufferReg *reg, BufferIO io, unsigned int size)
+{
+	if (BUFFER_I == io)
+		REG_SET_VAL(&(reg->I_SIZE), size);
+	else if (BUFFER_O == io)
+		REG_SET_VAL(&(reg->O_SIZE), size);
+}
+
 void ext_reg_set_buf_r_addr(ExtBufferReg *reg, BufferIO io, unsigned int addr)
 {
 	if (BUFFER_I == io)

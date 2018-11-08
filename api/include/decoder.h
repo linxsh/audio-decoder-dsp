@@ -1,7 +1,6 @@
 #ifndef __DECODER_H__
 #define __DECODER_H__
 
-#include "format.h"
 #include "register.h"
 #include "os_buffer.h"
 

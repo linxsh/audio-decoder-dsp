@@ -48,14 +48,13 @@ build: .config prepare compile link
 prepare:
 	@make  -C ./scripts prepare
 	@mkdir -p ./install/lib
-	@mkdir -p ./install/include
 	@mkdir -p ./install/bin
 
 compile:
 	@make -C ./platform
 	@make -C ./libsrc
 	@make -C ./api
-	#@make -C ./driver
+	@make -C ./driver
 	#@make -C ./app
 
 link:
@@ -65,17 +64,15 @@ clean:
 	@make -C ./platform clean
 	@make -C ./libsrc   clean
 	@make -C ./api      clean
-	#@make -C ./driver   clean
+	@make -C ./driver   clean
 	#@make -C ./app      clean
 	@rm ./install/lib     -rf
-	@rm ./install/include -rf
 	@rm ./install/bin     -rf
 
 distclean:
 	@find ./ -name *.o | xargs rm -f
 	@find ./ -name *.d | xargs rm -f
 	@rm ./install/lib     -rf
-	@rm ./install/include -rf
 	@rm ./install/bin     -rf
 	@rm .config -f
 	@rm .config.old -f

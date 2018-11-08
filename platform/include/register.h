@@ -1,29 +1,49 @@
 #ifndef __REG_H__
 #define __REG_H__
 
+typedef enum {
+	CODEC_ID_MPEG12     = 1,
+	CODEC_ID_OPUS       = 2,
+	CODEC_ID_VORBIS     = 3,
+	CODEC_ID_DOLBY      = 4,
+	CODEC_ID_DOLBY_PLUS = 5,
+	CODEC_ID_UNKOWN,
+} CodecID;
+
 typedef struct {
-	unsigned int CODEC_ID;
+	CodecID      CODEC_ID;     //enc data format
+	unsigned int BITS;         //PCM data format(0: auto)
+	unsigned int CHANNELS;     //PCM data format(0: auto)
+	unsigned int SAMPLE_RATE;  //PCM data format(0: auto)
+	unsigned int ENDIAN;       //PCM data format(0: auto; 1: big endian; 2: little endian)
+	unsigned int INTERLACE;
 } DecoderReadCtrl;
 
 typedef struct {
 	unsigned int ERROR_CODE;
-	unsigned int SAMPLE_RATE;
-	unsigned int CHANNELS;
+	unsigned int SAMPLE_RATE;  //PCM data format(0: auto)
+	unsigned int CHANNELS;     //PCM data format(0: auto)
+	unsigned int BITS;         //PCM data format(0: auto)
+	unsigned int ENDIAN;       //PCM data format(0: auto; 1: big endian; 2: little endian)
+	unsigned int INTERLACE;
 } DecoderWriteCtrl;
 
 typedef struct {
 } DecoderDebugCtrl;
 
 typedef struct {
-	unsigned int SAMPLE_RATE;
-	unsigned int CHANNELS;
-	unsigned int BITS;
+	unsigned int SAMPLE_RATE;  //PCM data format(0: auto)
+	unsigned int CHANNELS;     //PCM data format(0: auto)
+	unsigned int BITS;         //PCM data format(0: auto)
+	unsigned int ENDIAN;       //PCM data format(0: auto; 1: big endian; 2: little endian)
+	unsigned int INTERLACE;
 	unsigned int FRAME_MS;
 	unsigned int BIT_RATE;
 	unsigned int CBR;
 	unsigned int CVBR;
 	unsigned int COMPLEXITY;
 	unsigned int EXPECT_LOSS;
+	CodecID      CODEC_ID;     //enc data format
 } EncoderReadCtrl;
 
 typedef struct {
@@ -247,6 +267,8 @@ extern unsigned int   ext_reg_get_buf_w_addr (ExtBufferReg *reg, BufferIO io);
 extern unsigned int   ext_reg_get_buf_channel(ExtBufferReg *reg, BufferIO io);
 extern unsigned int   ext_reg_get_buf_loop   (ExtBufferReg *reg, BufferIO io);
 extern unsigned int   ext_reg_get_buf_eof    (ExtBufferReg *reg, BufferIO io);
+extern void           ext_reg_set_buf_addr   (ExtBufferReg *reg, BufferIO io, unsigned char *addr);
+extern void           ext_reg_set_buf_size   (ExtBufferReg *reg, BufferIO io, unsigned int   size);
 extern void           ext_reg_set_buf_r_addr (ExtBufferReg *reg, BufferIO io, unsigned int addr);
 extern void           ext_reg_set_buf_w_addr (ExtBufferReg *reg, BufferIO io, unsigned int addr);
 extern void           ext_reg_set_buf_loop   (ExtBufferReg *reg, BufferIO io, unsigned int loop);

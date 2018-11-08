@@ -21,7 +21,17 @@ typedef struct {
 } SubDevStatus;
 
 typedef struct {
-	DevStream    *dev;
+	unsigned char *virt_s_addr;
+	unsigned char *phys_s_addr;
+	unsigned int   size;
+	unsigned int   r_addr;
+	unsigned int   w_addr;
+	unsigned int   loop;
+} SubDevBuffer;
+
+typedef struct {
+	void         *s_addr;
+	void         *e_addr;
 	ExtReadReg   *r_reg;
 	void         *r_phys_reg;
 	ExtWriteReg  *w_reg;
@@ -30,8 +40,19 @@ typedef struct {
 	void         *d_phys_reg;
 	ExtBufferReg *b_reg;
 	void         *b_phys_reg;
+} SubDevExtReg;
+
+typedef struct {
+	DevStream    *dev;
+	SubDevExtReg  ext;
+	StreamTask    task;
 	unsigned int  task_id;
 	unsigned int  task_active;
+	SubDevBuffer  i_buf;
+	SubDevBuffer  o_buf;
+	unsigned int  i_empty;
+	unsigned int  o_full;
+	unsigned int  eof;
 } SubDevStream;
 
 extern int  stream_init  (void);

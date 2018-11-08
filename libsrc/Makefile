@@ -31,7 +31,6 @@ OPUS_INC_FLAGS += $(addprefix -I,./opus/silk)
 all: $(LIBS-y)
 ###########################################################################
 libopus.prep:
-	@mkdir -p ../install/include/opus
 	@echo "\033[31;36mlibopus.a compiling..\033[0m"
 
 libopus.a: $(OPUS_OBJECTS)
@@ -39,7 +38,6 @@ libopus.a: $(OPUS_OBJECTS)
 
 libopus.inst:
 	@mv libopus.a      ../install/lib
-	@cp opus/include/* ../install/include/opus -rf
 
 ifneq ($(MAKECMDGOALS), clean)
 -include $(OPUS_DEPENDS)
