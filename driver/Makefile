@@ -4,7 +4,7 @@ include ../scripts/compiler.mak
 
 ###########################################################################
 obj-y := ./dev_list.c
-obj-y += ./dev_stream.c
+obj-y += ./dev_core.c
 obj-y += ./kernelcall.c
 obj-y += ./log_format.c
 

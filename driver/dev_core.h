@@ -2,6 +2,7 @@
 #define __DEV_STREAM_H__
 
 typedef struct {
+	gx_spinlock_t lock;
 	GeneralReg   *reg;
 	unsigned int  ext_reg_size;
 	unsigned int  ext_reg_num;
@@ -15,7 +16,7 @@ typedef struct {
 	void         *firmware_size;
 	unsigned int  run_task0_id;
 	unsigned int  run_task1_id;
-} DevStream;
+} MajorDev;
 
 typedef struct {
 } SubDevStatus;
@@ -43,7 +44,6 @@ typedef struct {
 } SubDevExtReg;
 
 typedef struct {
-	DevStream    *dev;
 	SubDevExtReg  ext;
 	StreamTask    task;
 	unsigned int  task_id;
@@ -53,7 +53,7 @@ typedef struct {
 	unsigned int  i_empty;
 	unsigned int  o_full;
 	unsigned int  eof;
-} SubDevStream;
+} SubDev;
 
 extern int  stream_init  (void);
 extern void stream_uninit(void);

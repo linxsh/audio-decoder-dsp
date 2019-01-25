@@ -158,7 +158,7 @@ void reg_clear_task(TaskQueue queue)
 	val1 = REG_GET_FIELD(&(sReg->TASK_QUEQUE), 4, 4);
 
 	if ((val0 == 0) && (val1 == 0)) {
-		log_printf(COMMON_MODULE, LEVEL_ERRO,
+		log_printf(COMMON_MODULE, LEVEL_WARN,
 				"%s %d: val0(%d) val1(%d)\n",
 				__FUNCTION__, __LINE__, val0, val1);
 	} else if ((val0 == 0) && (val1 != 0)) {

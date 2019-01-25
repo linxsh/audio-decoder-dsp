@@ -1,7 +1,7 @@
 #include "kernelcall.h"
 #include "register.h"
 #include "stream_types.h"
-#include "dev_stream.h"
+#include "dev_core.h"
 #include "dev_list.h"
 #include "log_format.h"
 
@@ -29,7 +29,7 @@ static CodecID _switch_codec_id(StreamCodec codec)
 	return codec_id;
 }
 
-static int _config_buffer(SubDevStream *subDev, StreamConfig *config)
+static int _config_buffer(SubDev *subDev, StreamConfig *config)
 {
 	subDev->i_buf.virt_s_addr = gx_page_malloc(config->i_buf.size);
 	if (NULL == subDev->i_buf.virt_s_addr) {
@@ -85,17 +85,17 @@ BUFFER_ERROR:
 	return -1;
 }
 
-static int _config_task(SubDevStream *subDev, StreamConfig *config)
+static int _config_task(SubDev *subDev, StreamConfig *config)
 {
 	subDev->task = config->task;
 	if (TASK_DEOCDE == subDev->task) {
-		CodecID codec_id = _switch_codec_id(config->decode.i_codec);
+		CodecID codecID = _switch_codec_id(config->decode.i_codec);
 
-		ext_reg_set(&(subDev->ext.r_reg->DECODER.CODEC_ID),    codec_id);
-		ext_reg_set(&(subDev->ext.r_reg->DECODER.BITS),        config->decode.o_PCM.bits);
-		ext_reg_set(&(subDev->ext.r_reg->DECODER.ENDIAN),      config->decode.o_PCM.endian);
-		ext_reg_set(&(subDev->ext.r_reg->DECODER.SAMPLE_RATE), config->decode.o_PCM.sample_rate);
-		ext_reg_set(&(subDev->ext.r_reg->DECODER.CHANNELS),    config->decode.o_PCM.channels);
+		ext_reg_set(&(subDev->ext.r_reg->DECODER.CODEC_ID),    codecID);
+		ext_reg_set(&(subDev->ext.r_reg->DECODER.BITS),        config->decode.o_pcm.bits);
+		ext_reg_set(&(subDev->ext.r_reg->DECODER.ENDIAN),      config->decode.o_pcm.endian);
+		ext_reg_set(&(subDev->ext.r_reg->DECODER.SAMPLE_RATE), config->decode.o_pcm.sample_rate);
+		ext_reg_set(&(subDev->ext.r_reg->DECODER.CHANNELS),    config->decode.o_pcm.channels);
 	} else if (TASK_ENCODE == subDev->task) {
 	} else if (TASK_RESAMPLE == subDev->task) {
 	}
@@ -103,8 +103,10 @@ static int _config_task(SubDevStream *subDev, StreamConfig *config)
 	return 0;
 }
 
-static int _start_task(SubDevStream *subDev)
+static int _start_task(void)
 {
+	SubDev *subDev = search_sub_dev(0);
+
 	if (subDev->i_empty || subDev->o_full)
 		return 0;
 
@@ -119,10 +121,10 @@ static int _start_task(SubDevStream *subDev)
 	return 0;
 }
 
-int stream_init(void)
+int core_init(void)
 {
 	if (devInit == 0) {
-		DevStream *dev = create_dev();
+		MajorDev *dev = create_dev();
 
 		if (dev == NULL) {
 			log_format(DRIVER, ERRO,
@@ -172,12 +174,12 @@ int stream_init(void)
 	return 0;
 }
 
-void stream_uninit(void)
+void core_uninit(void)
 {
 	devInit--;
 
 	if (devInit == 0) {
-		DevStream *dev = search_dev();
+		MajorDev *dev = search_dev();
 
 		reg_clr_task_isr_en(~0x0);
 		reg_disable_run();
@@ -209,18 +211,28 @@ void stream_uninit(void)
 	return;
 }
 
-int stream_open(unsigned int id)
+int core_open(unsigned int id)
 {
-	SubDevStream *subDev = NULL;
+	MajorDev* majorDev = search_dev();
+	SubDev *subDev  = NULL;
 	void *sVirtAddr = NULL;
 	void *sPhysAddr = NULL;
 	unsigned int offset = 0;
+	unsigned long flags;
 
+#ifdef CONFIG_DSP32
+	gx_pe(&majorDev->lock, flags);
+#else
+#endif
 	subDev = create_sub_dev(id);
+#ifdef CONFIG_DSP32
+	gx_spin_unlock_irqrestore(&majorDev->lock, flags);
+#else
+#endif
 	if (!subDev) {
 		log_format(DRIVER, ERRO,
-				"%s %d: sub dev(%d) create error\n",
-				__FUNCTION__, __LINE__, id);
+				"%s %d: sub dev(%d) create error flags(%x)\n",
+				__FUNCTION__, __LINE__, id, flags);
 		return -1;
 	}
 
@@ -229,17 +241,9 @@ int stream_open(unsigned int id)
 	subDev->i_empty     = 0;
 	subDev->o_full      = 0;
 
-	subDev->dev = search_dev();
-	if (!subDev->dev) {
-		log_format(DRIVER, ERRO,
-				"%s %d: dev not exist\n",
-				__FUNCTION__, __LINE__);
-		return -1;
-	}
-
-	sVirtAddr = subDev->dev->ext_reg_virt_addr;
-	sPhysAddr = subDev->dev->ext_reg_phys_addr;
-	offset    = id * subDev->dev->ext_reg_size;
+	sVirtAddr = majorDev->ext_reg_virt_addr;
+	sPhysAddr = majorDev->ext_reg_phys_addr;
+	offset    = id * majorDev->ext_reg_size;
 	subDev->ext.r_reg      = (ExtReadReg   *)(sVirtAddr + offset);
 	subDev->ext.r_phys_reg = (void *)        (sPhysAddr + offset);
 	offset   += sizeof(ExtReadReg);
@@ -258,9 +262,9 @@ int stream_open(unsigned int id)
 	return 0;
 }
 
-void stream_close(unsigned int id)
+void core_close(unsigned int id)
 {
-	SubDevStream *subDev = search_sub_dev(id);
+	SubDev *subDev = search_sub_dev(id);
 
 	if (!subDev) {
 		log_format(DRIVER, ERRO,
@@ -285,9 +289,9 @@ void stream_close(unsigned int id)
 	return;
 }
 
-int stream_config(unsigned int id, StreamConfig *config)
+int core_config(unsigned int id, StreamConfig *config)
 {
-	SubDevStream *subDev = search_sub_dev(id);
+	SubDev *subDev = search_sub_dev(id);
 
 	if (!subDev) {
 		log_format(DRIVER, ERRO,
@@ -313,9 +317,9 @@ int stream_config(unsigned int id, StreamConfig *config)
 	return 0;
 }
 
-int stream_start(unsigned int id)
+int core_start(unsigned int id)
 {
-	SubDevStream *subDev = search_sub_dev(id);
+	SubDev *subDev = search_sub_dev(id);
 
 	if (!subDev) {
 		log_format(DRIVER, ERRO,
@@ -324,27 +328,27 @@ int stream_start(unsigned int id)
 		return -1;
 	}
 
-	_start_task(subDev);
+	_start_task();
 
 	return 0;
 }
 
-int stream_stop(unsigned int id)
+int core_stop(unsigned int id)
 {
 	return 0;
 }
 
-int stream_read(unsigned int id, unsigned char *buf, unsigned int size)
+int core_read(unsigned int id, unsigned char *buf, unsigned int size)
 {
 	return 0;
 }
 
-int stream_write(unsigned int id, unsigned char *buf, unsigned int size)
+int core_write(unsigned int id, unsigned char *buf, unsigned int size)
 {
 	return 0;
 }
 
-int stream_isr(void)
+int core_isr(void)
 {
 	return 0;
 }

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define gx_malloc(size)               malloc(size)
 #define gx_free(p)                    free(p)
@@ -15,11 +16,15 @@
 #define gx_page_free(p, size)         free(p)
 #define gx_virt_to_phys(p)            (p)
 #define gx_dcache_clean_range(p0, p1) ((void)0)
-
 #define gx_printf(fmt, args...)       printf(fmt, ##args)
 #define gx_vprintf(fmt, args...)      vprintf(fmt, args)
-
 #define gx_mdelay(ms)                 usleep((ms) * 1000)
+
+typedef pthread_mutex_t gx_mutex_t;
+#define gx_pthread_mutex_init(lock)            pthread_mutex_init(lock)
+#define gx_pthread_mutex_lock(lock)            pthread_mutex_lock(lock)
+#define gx_pthread_mutex_unlock(lock)          pthread_mutex_unlock(lock)
+#define gx_pthread_mutex_destory(lock)         pthread_mutex_destroy(lock)
 #endif
 
 
