@@ -97,29 +97,36 @@ typedef struct {
 	unsigned int O_EXT;
 	unsigned int O_S_ADDR;
 	unsigned int O_R_ADDR;
-	unsigned int O_W_ADDR;
+	unsigned int O_W_ADDR;     //?? dsp -> cpu
 	unsigned int O_CHANNEL;
 	unsigned int O_SIZE;
 	unsigned int O_LOOP;
 } ExtBufferReg;
 
 /*************************************************************************
- * INTEN/INT       :   0  ~ 7    task0 interrupt
- *                     8  ~ 15   task1 interrupt
- *                     24        complete stop startup(), do interrupt
+ * INTEN/INT      :    0  ~ 3    task0 interrupt
+ *                     ......    ........
+ *                     28 ~ 31   task7 interrupt
  *
- * RUN_ENABLE      :   0         start startup() function
+ * RUN_ENABLE     :    0         run/stop startup() function
+ *                     1         run      startup() flags    //??? use start interrupt
+ *                     2         stop     startup() flags    //??? use start interrupt
  *
- * RUN_CTRL        :   0  ~ 3    run or stop task0 or task1
- *                     8  ~ 11   task0 id
- *                     12 ~ 15   task1 id
- *                     16 ~ 19   task0 do
- *                     20 ~ 23   task1 do
- *                     24        stop startup() function
+ * TASK_CTRL      :    0  ~ 2    select task0 ~ task7
+ *                     3         run/stop
  *                     31        assign one task
  *
- * TASK_QUEQUE    :    0  ~ 3     store task0 or task1
- *                     4  ~ 7     store task0 or task1
+ * TASK_ID        :    0  ~ 3    task0 magic
+ *                     ......    .......
+ *                     28 ~ 31   task7 magic
+ *
+ * TASK_DO        :    0  ~ 3    task0 do
+ *                     ......    .......
+ *                     28 ~ 31   task1 do
+ *
+ * TASK_QUEQUE    :    0  ~ 3    store task0 ~ task7
+ *                     ......    .......
+ *                     28 ~ 31   store task0 ~ task7
 *************************************************************************/
 
 typedef struct {
@@ -132,8 +139,10 @@ typedef struct {
 	unsigned int INTEN;
 	unsigned int INT;
 	unsigned int RUN_ENABLE;                 /* 0x11c     位置不能改变*/
-	unsigned int RUN_CTRL;                   /* 0x120     位置不能改变*/
-	unsigned int RES2[7];                    /* audio key 位置不能改变*/
+	unsigned int TASK_CTRL;                  /* 0x120     位置不能改变*/
+	unsigned int TASK_ID;
+	unsigned int TASK_DO;
+	unsigned int RES2[5];                    /* audio key 位置不能改变*/
 	unsigned int EXT0;                       /* 0x140 */
 	unsigned int RUN_SPACE_ADDR;
 	unsigned int RUN_SPACE_SIZE;
