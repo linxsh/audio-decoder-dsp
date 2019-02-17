@@ -38,28 +38,45 @@ $(obj)/conf:
 	@make -C $(SUBDIR)
 
 ###################################################################################
-.PHONY: process result
+.PHONY: prepare compile link
 
-build: .config process result
+build: .config prepare compile link
 
 .config:
 	@make menuconfig
 
-process:
-	@make -C src
+prepare:
+	@make  -C ./scripts prepare
+	@mkdir -p ./install/lib
+	@mkdir -p ./install/bin
 
-result:
-	@ls -l bin
+compile:
+	@make -C ./platform
+	@make -C ./libsrc
+	@make -C ./api
+	@make -C ./driver
+	#@make -C ./app
+
+link:
+	@make -C ./scripts link
 
 clean:
-	@make -C ./src clean
-	@rm -rf bin
+	@make -C ./platform clean
+	@make -C ./libsrc   clean
+	@make -C ./api      clean
+	@make -C ./driver   clean
+	#@make -C ./app      clean
+	@rm ./install/lib     -rf
+	@rm ./install/bin     -rf
 
-distclean: clean
-	@make -C $(SUBDIR) clean
+distclean:
 	@find ./ -name *.o | xargs rm -f
 	@find ./ -name *.d | xargs rm -f
-	@find ./ -name .config | xargs rm -f
+	@rm ./install/lib     -rf
+	@rm ./install/bin     -rf
+	@rm .config -f
+	@rm .config.old -f
+	@rm scripts/kconfig/mconf -f
 
 help:
 	@echo 'Cleaning:'

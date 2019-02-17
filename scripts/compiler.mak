@@ -1,0 +1,24 @@
+COMPILER_FLAGS += -DCOMPILE_VERS=\"$(CONFIG_VERSION)\"
+COMPILER_FLAGS += -DCOMPILE_DATE=\"$(shell date +%F)\$(shell date +%H:%M:%S)\"
+
+ifeq ($(CONFIG_X86), y)
+COMPILER =
+COMPILER_PATCH =
+endif
+
+ifeq ($(CONFIG_DSP32), y)
+COMPILER_PATCH = ../toolchains/or32-uclinux-3.4.4/bin/
+COMPILER = or32-uclinux-
+endif
+
+CC      = $(COMPILER_PATCH)$(COMPILER)gcc
+CPP     = $(COMPILER_PATCH)$(COMPILER)g++
+LD      = $(COMPILER_PATCH)$(COMPILER)ld
+AS      = $(COMPILER_PATCH)$(COMPILER)as
+AR      = $(COMPILER_PATCH)$(COMPILER)ar
+OBJCOPY = $(COMPILER_PATCH)$(COMPILER)objcopy
+OBJDUMP = $(COMPILER_PATCH)$(COMPILER)objdump
+NM      = $(COMPILER_PATCH)$(COMPILER)nm
+STRIP   = $(COMPILER_PATCH)$(COMPILER)strip
+READELF = $(COMPILER_PATCH)$(COMPILER)readelf -a
+
